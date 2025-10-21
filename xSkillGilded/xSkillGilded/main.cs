@@ -459,37 +459,7 @@ namespace xSkillGilded {
             #endregion
 
             #region Skills actions
-                float actx = padd + _ui(8);
-                float acty = windowHeight - padd - _ui(8);
-
-                float actbw = _ui(96);
-                float actbh = _ui(96);
-                float actbx = actx;
-                float actby = acty - actbh;
-                float actLh = _ui(24);
-                bool isSparing = xLevelingClient.LocalPlayerSkillSet.Sparring;
-
-                drawSetColor(new Vector4(1,1,1,isSparing? 1 : .5f));
-                drawImage(Sprite("elements", isSparing? "sparring_enabled" : "sparring_disabled"), actbx + actbw / 2 - _ui(96) / 2, actby + actbh - _ui(96), _ui(96), _ui(96));
-                drawSetColor(c_white);
-                
-                drawImage9patch(Sprite("elements", "button_idle"), actbx, actby + actbh - actLh, actbw, actLh, 2);
-                if (mouseHover(actbx, actby, actbx + actbw, actby + actbh)) {
-                    _hoveringID = "Sparring";
-                    drawImage9patch(Sprite("elements", "button_idle_hovering"), actbx-1, actby + actbh - actLh-1, actbw+2, actLh+2, 2);
-                    if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
-                        OnSparringToggle(!isSparing);
-                        api.Gui.PlaySound(new AssetLocation("xskillgilded", isSparing? "sounds/sparringoff.ogg" : "sounds/sparringon.ogg"), false, .6f);
-                    }
-
-                    if(ImGui.IsMouseDown(ImGuiMouseButton.Left)) {
-                        drawImage9patch(Sprite("elements", "button_pressing"), actbx, actby + actbh - actLh, actbw, actLh, 2);
-                    }
-                    
-                    hoveringTooltip = new(Lang.GetUnformatted("xlib:sparringmode"), Lang.GetUnformatted("xlib:sparring-desc"));
-                } 
-
-                drawTextFont(fSubtitle, "Spar", actbx + actbw / 2, actby + actbh - _ui(4), HALIGN.Center, VALIGN.Bottom);
+            DrawSkillsActions(padd, windowHeight, ref _hoveringID);
             #endregion
 
             #region Tooltip
@@ -986,6 +956,40 @@ namespace xSkillGilded {
                     hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:unlearnTitle"), desc);
                 }
             }
+        }
+
+        private void DrawSkillsActions(float padd, int windowHeight, ref string _hoveringID) {
+            float actx = padd + _ui(8);
+            float acty = windowHeight - padd - _ui(8);
+
+            float actbw = _ui(96);
+            float actbh = _ui(96);
+            float actbx = actx;
+            float actby = acty - actbh;
+            float actLh = _ui(24);
+            bool isSparing = xLevelingClient.LocalPlayerSkillSet.Sparring;
+
+            drawSetColor(new Vector4(1,1,1,isSparing? 1 : .5f));
+            drawImage(Sprite("elements", isSparing? "sparring_enabled" : "sparring_disabled"), actbx + actbw / 2 - _ui(96) / 2, actby + actbh - _ui(96), _ui(96), _ui(96));
+            drawSetColor(c_white);
+
+            drawImage9patch(Sprite("elements", "button_idle"), actbx, actby + actbh - actLh, actbw, actLh, 2);
+            if (mouseHover(actbx, actby, actbx + actbw, actby + actbh)) {
+                _hoveringID = "Sparring";
+                drawImage9patch(Sprite("elements", "button_idle_hovering"), actbx-1, actby + actbh - actLh-1, actbw+2, actLh+2, 2);
+                if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
+                    OnSparringToggle(!isSparing);
+                    api.Gui.PlaySound(new AssetLocation("xskillgilded", isSparing? "sounds/sparringoff.ogg" : "sounds/sparringon.ogg"), false, .6f);
+                }
+
+                if(ImGui.IsMouseDown(ImGuiMouseButton.Left)) {
+                    drawImage9patch(Sprite("elements", "button_pressing"), actbx, actby + actbh - actLh, actbw, actLh, 2);
+                }
+
+                hoveringTooltip = new(Lang.GetUnformatted("xlib:sparringmode"), Lang.GetUnformatted("xlib:sparring-desc"));
+            }
+
+            drawTextFont(fSubtitle, "Spar", actbx + actbw / 2, actby + actbh - _ui(4), HALIGN.Center, VALIGN.Bottom);
         }
 
         private string formatAbilityDescription(Ability ability, int currTier) {
