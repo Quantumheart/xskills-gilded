@@ -431,6 +431,13 @@ public class xSkillGraphicalUI : ModSystem
     {
         if (!isOpen) return CallbackGUIStatus.Closed;
 
+        // NEW: Check for Escape key press to close the window
+        if (ImGui.IsKeyPressed(ImGuiKey.Escape))
+        {
+            Close();
+            return CallbackGUIStatus.Closed;
+        }
+        
         var window = api.Gui.WindowBounds;
         var xPlatform = api.Forms;
         var size = xPlatform.GetScreenSize();
