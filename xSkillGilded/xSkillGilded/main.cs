@@ -432,6 +432,11 @@ namespace xSkillGilded {
 
             ImGui.Begin("xSkill Gilded", flags);
             
+            // Get actual window position
+            Vector2 windowPos = ImGui.GetWindowPos();
+            windowPosX = windowPos.X;
+            windowPosY = windowPos.Y;
+            
             drawImage(Sprite("elements", "bg"), 0, 0, windowWidth, windowHeight);
             float padd = _ui(contentPadding);
             float contentWidth = windowWidth - _ui(tooltipWidth) - padd * 2;
