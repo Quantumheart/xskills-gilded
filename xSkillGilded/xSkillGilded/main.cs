@@ -439,88 +439,10 @@ namespace xSkillGilded {
             stopwatch.Restart();
 
             string _hoveringID = null;
-            
+
             #region Skill Group Tab
-                float btx = padd;
-                float bty = padd;
-                float bth = _ui(32);
-                
-                float _btsw  = _ui(96);
-                float btxc   = btx + _btsw / 2;
-                float btww   = _btsw * .5f / 2;
-                float _alpha = 1f;
-                
-                if(page == "_Specialize") {
-                    drawImage(Sprite("elements", "tab_sep_selected"), btxc - btww, bty + bth - 4, btww * 2, 4);
-                    _alpha = 1f;
-
-                } else if (mouseHover(btx, bty, btx + _btsw, bty + bth)) {
-                    _hoveringID = "_Specialize";
-                    drawImage(Sprite("elements", "tab_sep_hover"), btxc - btww, bty + bth - 4, btww * 2, 4);
-                    _alpha = 1f;
-                    if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
-                        setPage("_Specialize");
-                        api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
-                    }
-
-                } else {
-                    drawImage(Sprite("elements", "tab_sep"), btxc - btww, bty + bth - 4, btww * 2, 4);
-                    _alpha = .5f;
-                }
-
-                drawSetColor(c_white, _alpha);
-                drawImage(page == "_Specialize"? Sprite("elements", "meta_spec_selected") : Sprite("elements", "meta_spec"), btxc - _ui(24 / 2), bty + 4, _ui(24), _ui(24));
-                drawSetColor(c_white);
-                btx += _btsw;
-                
-                float btw = (windowWidth - padd - btx) / skillGroups.Count;
-                
-                foreach(string groupName in skillGroups.Keys) {
-                    btxc = btx + btw / 2;
-                    btww = btw * .5f / 2;
-                    float alpha = 1f;
-                    Font _fTitle = fTitle;
-
-                    int points = 0;
-                    foreach(PlayerSkill skill in skillGroups[groupName]) {
-                        points += skill.AbilityPoints;
-                    }
-
-                    if (groupName == page) {
-                        drawImage(Sprite("elements", "tab_sep_selected"), btxc - btww, bty + bth - 4, btww * 2, 4);
-                        _fTitle = fTitleGold;
-
-                    } else if (mouseHover(btx, bty, btx + btw, bty + bth)) {
-                        _hoveringID = groupName;
-                        drawImage(Sprite("elements", "tab_sep_hover"), btxc - btww, bty + bth - 4, btww * 2, 4);
-                        if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
-                            setPage(groupName);
-                            api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
-                        }
-
-                    } else {
-                        drawImage(Sprite("elements", "tab_sep"), btxc - btww, bty + bth - 4, btww*2, 4);
-                        alpha = .5f;
-                    }
-
-                    drawSetColor(c_white, alpha);
-                    Vector2 skillName_size = drawTextFont(_fTitle, groupName, btx + btw / 2, bty + bth / 2, HALIGN.Center, VALIGN.Center);
-                    drawSetColor(c_white);
-                
-                    if(points > 0) {
-                        float _pax = btx + btw / 2 + skillName_size.X / 2 + _ui(20);
-                        float _pay = bty + bth / 2;
-
-                        string pointsText = points.ToString();
-                        Vector2 pointsText_size = fSubtitle.CalcTextSize(pointsText);
-                        drawSetColor(c_lime, .3f);
-                        drawImage9patch(Sprite("elements", "glow"), _pax - 16, _pay - pointsText_size.Y / 2 - 12, pointsText_size.X + 32, pointsText_size.Y + 24, 15);
-                        drawSetColor(c_white);
-                        drawTextFont(fSubtitle, pointsText, _pax, _pay, HALIGN.Left, VALIGN.Center);
-                    }
-
-                    btx += btw;
-                }
+            float bty = DrawSkillGroupTab(padd, windowWidth, ref _hoveringID);
+            float bth = _ui(32);
             #endregion
 
             #region Skills Tab
@@ -964,6 +886,91 @@ namespace xSkillGilded {
             ImGui.End();
 
             return CallbackGUIStatus.GrabMouse;
+        }
+
+        private float DrawSkillGroupTab(float padd, int windowWidth, ref string _hoveringID) {
+            float btx = padd;
+            float bty = padd;
+            float bth = _ui(32);
+
+            float _btsw  = _ui(96);
+            float btxc   = btx + _btsw / 2;
+            float btww   = _btsw * .5f / 2;
+            float _alpha = 1f;
+
+            if(page == "_Specialize") {
+                drawImage(Sprite("elements", "tab_sep_selected"), btxc - btww, bty + bth - 4, btww * 2, 4);
+                _alpha = 1f;
+
+            } else if (mouseHover(btx, bty, btx + _btsw, bty + bth)) {
+                _hoveringID = "_Specialize";
+                drawImage(Sprite("elements", "tab_sep_hover"), btxc - btww, bty + bth - 4, btww * 2, 4);
+                _alpha = 1f;
+                if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
+                    setPage("_Specialize");
+                    api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
+                }
+
+            } else {
+                drawImage(Sprite("elements", "tab_sep"), btxc - btww, bty + bth - 4, btww * 2, 4);
+                _alpha = .5f;
+            }
+
+            drawSetColor(c_white, _alpha);
+            drawImage(page == "_Specialize"? Sprite("elements", "meta_spec_selected") : Sprite("elements", "meta_spec"), btxc - _ui(24 / 2), bty + 4, _ui(24), _ui(24));
+            drawSetColor(c_white);
+            btx += _btsw;
+
+            float btw = (windowWidth - padd - btx) / skillGroups.Count;
+
+            foreach(string groupName in skillGroups.Keys) {
+                btxc = btx + btw / 2;
+                btww = btw * .5f / 2;
+                float alpha = 1f;
+                Font _fTitle = fTitle;
+
+                int points = 0;
+                foreach(PlayerSkill skill in skillGroups[groupName]) {
+                    points += skill.AbilityPoints;
+                }
+
+                if (groupName == page) {
+                    drawImage(Sprite("elements", "tab_sep_selected"), btxc - btww, bty + bth - 4, btww * 2, 4);
+                    _fTitle = fTitleGold;
+
+                } else if (mouseHover(btx, bty, btx + btw, bty + bth)) {
+                    _hoveringID = groupName;
+                    drawImage(Sprite("elements", "tab_sep_hover"), btxc - btww, bty + bth - 4, btww * 2, 4);
+                    if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
+                        setPage(groupName);
+                        api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
+                    }
+
+                } else {
+                    drawImage(Sprite("elements", "tab_sep"), btxc - btww, bty + bth - 4, btww*2, 4);
+                    alpha = .5f;
+                }
+
+                drawSetColor(c_white, alpha);
+                Vector2 skillName_size = drawTextFont(_fTitle, groupName, btx + btw / 2, bty + bth / 2, HALIGN.Center, VALIGN.Center);
+                drawSetColor(c_white);
+
+                if(points > 0) {
+                    float _pax = btx + btw / 2 + skillName_size.X / 2 + _ui(20);
+                    float _pay = bty + bth / 2;
+
+                    string pointsText = points.ToString();
+                    Vector2 pointsText_size = fSubtitle.CalcTextSize(pointsText);
+                    drawSetColor(c_lime, .3f);
+                    drawImage9patch(Sprite("elements", "glow"), _pax - 16, _pay - pointsText_size.Y / 2 - 12, pointsText_size.X + 32, pointsText_size.Y + 24, 15);
+                    drawSetColor(c_white);
+                    drawTextFont(fSubtitle, pointsText, _pax, _pay, HALIGN.Left, VALIGN.Center);
+                }
+
+                btx += btw;
+            }
+
+            return bty + bth;
         }
 
         private string formatAbilityDescription(Ability ability, int currTier) {
