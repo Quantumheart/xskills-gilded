@@ -440,31 +440,19 @@ namespace xSkillGilded {
 
             string _hoveringID = null;
 
-            #region Skill Group Tab
             float bty = DrawSkillGroupTab(padd, windowWidth, ref _hoveringID);
             float bth = _ui(32);
-            #endregion
 
-            #region Skills Tab
             float sky = DrawSkillsTab(padd, bty, bth, windowWidth, ref _hoveringID);
             float skh = _ui(32);
-            #endregion
 
-            #region Ability
             DrawAbility(padd, sky, skh, contentWidth, windowHeight, deltaTime, flags);
-            #endregion
 
-            #region Skills Description
             DrawSkillsDescription(padd, sky, skh);
-            #endregion
 
-            #region Skills actions
             DrawSkillsActions(padd, windowHeight, ref _hoveringID);
-            #endregion
 
-            #region Tooltip
             DrawTooltip(padd, sky, skh, windowWidth, windowHeight);
-            #endregion
 
             // if(_hoveringID != null && _hoveringID != hoveringID) api.Gui.PlaySound("tick", false, .5f); // too annoying
             hoveringID = _hoveringID;
