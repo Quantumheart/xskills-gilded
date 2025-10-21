@@ -463,113 +463,7 @@ namespace xSkillGilded {
             #endregion
 
             #region Tooltip
-                float tooltipX = windowWidth - tooltipWidth - padd;
-                float tooltipY = sky + skh + _ui(32);
-                float tooltipW = tooltipWidth - padd;
-                float tooltipH = windowHeight - tooltipY - padd;
-                
-                drawImage(Sprite("elements", "tooltip_sep_v"), tooltipX - _ui(16), tooltipY, 2, tooltipH);
-                
-                if(hoveringTooltip != null) {
-                    tooltipY += fTitleGold.getLineHeight();
-                    drawTextFont(fTitleGold, hoveringTooltip.Title, tooltipX + _ui(8), tooltipY, HALIGN.Left, VALIGN.Bottom);
-                    
-                    tooltipY += _ui(2);
-                    drawProgressBar(0, tooltipX, tooltipY, tooltipW, _ui(4), c_dkgrey, c_lime);
-                    tooltipY += _ui(12);
-                    
-                    // float h = drawTextWrap(hoveringTooltip.Description, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
-                    if(currentTooltip != hoveringTooltip.Description) {
-                        tooltipVTML = VTML.parseVTML(hoveringTooltip.Description);
-                        currentTooltip = hoveringTooltip.Description; 
-                    }
-
-                    float h = drawTextVTML(tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
-
-                } else if(_hoveringButton != null) {
-                    PlayerAbility ability = _hoveringButton.Ability;
-                    
-                    string name      = ability.Ability.DisplayName;
-                    string skillName = ability.Ability.Skill.DisplayName;
-                    int    tier      = ability.Tier;
-                    int    tierMax   = ability.Ability.MaxTier;
-                    string tierText  = "Lv. " + tier + "/" + tierMax;
-                    
-                    tooltipY += fTitleGold.getLineHeight();
-                    drawTextFont(fTitleGold, name, tooltipX + _ui(8), tooltipY, HALIGN.Left, VALIGN.Bottom);
-                    drawTextFont(fSubtitle, tierText, tooltipX + tooltipW - _ui(8), tooltipY, HALIGN.Right, VALIGN.Bottom);
-
-                    tooltipY += _ui(2);
-                    drawProgressBar((float)tier / tierMax, tooltipX, tooltipY, tooltipW, _ui(4), c_dkgrey, tier == tierMax? c_gold : c_lime);
-                    tooltipY += _ui(12);
-
-                    string descCurrTier = formatAbilityDescription(ability.Ability, tier);
-                    // float h = drawTextWrap(descCurrTier, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
-                    if(currentTooltip != descCurrTier) {
-                        tooltipVTML = VTML.parseVTML(descCurrTier);
-                        currentTooltip = descCurrTier; 
-                    }
-
-                    float h = drawTextVTML(tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
-                    tooltipY += Math.Max(h + _ui(16), _ui(160));
-
-                    drawSetColor(new(104/255f, 76/255f, 60/255f, 1));
-                    drawImage(Sprite("elements", "tooltip_sep"), tooltipX + _ui(8), tooltipY, tooltipW - _ui(16), 1);
-                    drawSetColor(c_white);
-                    tooltipY += _ui(16);
-
-                    if (tier < tierMax) {
-                        int requiredLevel = ability.Ability.RequiredLevel(tier + 1);
-                        string reqText    = string.Format(Lang.GetUnformatted("xskillgilded:abilityLevelRequired"), skillName, requiredLevel);
-
-                        drawSetColor(currentPlayerSkill.Level >= requiredLevel? c_lime : c_red);
-                        drawTextFont(fSubtitle, reqText, tooltipX + _ui(8), tooltipY);
-                        drawSetColor(c_white);
-                        tooltipY += fSubtitle.getLineHeight() + _ui(4);
-
-                        List<Requirement> requirements = ability.Ability.Requirements;
-                        foreach (Requirement req in requirements) {
-                            if(req.MinimumTier > tier + 1) continue;
-                            reqText = req.ShortDescription(ability);
-
-                            if (reqText == null || reqText.Length == 0) continue;
-                            string[] reqLines = reqText.Split('\n');
-
-                            bool isFulfilled = req.IsFulfilled(ability, ability.Tier + 1);
-                            drawSetColor(isFulfilled? c_lime : c_red);
-
-                            ExclusiveAbilityRequirement exReq = req as ExclusiveAbilityRequirement;
-                            if (exReq != null)
-                                drawSetColor(isFulfilled? c_grey : c_red);
-                        
-                            foreach (string reqLine in reqLines) {
-                                if (reqLine.Length == 0) continue;
-                                drawTextFont(fSubtitle, reqLine, tooltipX + _ui(8), tooltipY);
-                                tooltipY += fSubtitle.getLineHeight() + _ui(2);
-                            }
-
-                            drawSetColor(c_white);
-
-                            tooltipY += _ui(4);
-                        }
-                    }
-
-                    float actX = windowWidth  - padd - _ui(16);
-                    float actY = windowHeight - padd - _ui( 8);
-                    
-                    drawSetColor(c_grey);
-                    Vector2 _mouseRsize = drawTextFont(fSubtitle, Lang.GetUnformatted("xskillgilded:actionUnlearn"), actX, actY, HALIGN.Right, VALIGN.Bottom);    
-                    drawImage(Sprite("elements", "mouse_right"), actX - _mouseRsize.X / 2 - _ui(64 / 2), actY - _ui(32 + 16), _ui(64), _ui(32));
-                    actX -= _mouseRsize.X + _ui(16);
-                    
-                    Vector2 _mouseLsize = drawTextFont(fSubtitle, Lang.GetUnformatted("xskillgilded:actionLearn"), actX, actY, HALIGN.Right, VALIGN.Bottom);
-                    drawImage(Sprite("elements", "mouse_left"),  actX - _mouseLsize.X / 2 - _ui(64 / 2), actY - _ui(32 + 16), _ui(64), _ui(32));
-                    actX -= _mouseLsize.X + _ui(16);
-                    drawSetColor(c_white);
-                }
-                
-                hoveringTooltip = null;
-                    
+            DrawTooltip(padd, sky, skh, windowWidth, windowHeight);
             #endregion
 
             // if(_hoveringID != null && _hoveringID != hoveringID) api.Gui.PlaySound("tick", false, .5f); // too annoying
@@ -990,6 +884,115 @@ namespace xSkillGilded {
             }
 
             drawTextFont(fSubtitle, "Spar", actbx + actbw / 2, actby + actbh - _ui(4), HALIGN.Center, VALIGN.Bottom);
+        }
+
+        private void DrawTooltip(float padd, float sky, float skh, int windowWidth, int windowHeight) {
+            float tooltipX = windowWidth - tooltipWidth - padd;
+            float tooltipY = sky + skh + _ui(32);
+            float tooltipW = tooltipWidth - padd;
+            float tooltipH = windowHeight - tooltipY - padd;
+
+            drawImage(Sprite("elements", "tooltip_sep_v"), tooltipX - _ui(16), tooltipY, 2, tooltipH);
+
+            if(hoveringTooltip != null) {
+                tooltipY += fTitleGold.getLineHeight();
+                drawTextFont(fTitleGold, hoveringTooltip.Title, tooltipX + _ui(8), tooltipY, HALIGN.Left, VALIGN.Bottom);
+
+                tooltipY += _ui(2);
+                drawProgressBar(0, tooltipX, tooltipY, tooltipW, _ui(4), c_dkgrey, c_lime);
+                tooltipY += _ui(12);
+
+                // float h = drawTextWrap(hoveringTooltip.Description, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
+                if(currentTooltip != hoveringTooltip.Description) {
+                    tooltipVTML = VTML.parseVTML(hoveringTooltip.Description);
+                    currentTooltip = hoveringTooltip.Description;
+                }
+
+                float h = drawTextVTML(tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
+
+            } else if(hoveringButton != null) {
+                PlayerAbility ability = hoveringButton.Ability;
+
+                string name      = ability.Ability.DisplayName;
+                string skillName = ability.Ability.Skill.DisplayName;
+                int    tier      = ability.Tier;
+                int    tierMax   = ability.Ability.MaxTier;
+                string tierText  = "Lv. " + tier + "/" + tierMax;
+
+                tooltipY += fTitleGold.getLineHeight();
+                drawTextFont(fTitleGold, name, tooltipX + _ui(8), tooltipY, HALIGN.Left, VALIGN.Bottom);
+                drawTextFont(fSubtitle, tierText, tooltipX + tooltipW - _ui(8), tooltipY, HALIGN.Right, VALIGN.Bottom);
+
+                tooltipY += _ui(2);
+                drawProgressBar((float)tier / tierMax, tooltipX, tooltipY, tooltipW, _ui(4), c_dkgrey, tier == tierMax? c_gold : c_lime);
+                tooltipY += _ui(12);
+
+                string descCurrTier = formatAbilityDescription(ability.Ability, tier);
+                // float h = drawTextWrap(descCurrTier, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
+                if(currentTooltip != descCurrTier) {
+                    tooltipVTML = VTML.parseVTML(descCurrTier);
+                    currentTooltip = descCurrTier;
+                }
+
+                float h = drawTextVTML(tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
+                tooltipY += Math.Max(h + _ui(16), _ui(160));
+
+                drawSetColor(new(104/255f, 76/255f, 60/255f, 1));
+                drawImage(Sprite("elements", "tooltip_sep"), tooltipX + _ui(8), tooltipY, tooltipW - _ui(16), 1);
+                drawSetColor(c_white);
+                tooltipY += _ui(16);
+
+                if (tier < tierMax) {
+                    int requiredLevel = ability.Ability.RequiredLevel(tier + 1);
+                    string reqText    = string.Format(Lang.GetUnformatted("xskillgilded:abilityLevelRequired"), skillName, requiredLevel);
+
+                    drawSetColor(currentPlayerSkill.Level >= requiredLevel? c_lime : c_red);
+                    drawTextFont(fSubtitle, reqText, tooltipX + _ui(8), tooltipY);
+                    drawSetColor(c_white);
+                    tooltipY += fSubtitle.getLineHeight() + _ui(4);
+
+                    List<Requirement> requirements = ability.Ability.Requirements;
+                    foreach (Requirement req in requirements) {
+                        if(req.MinimumTier > tier + 1) continue;
+                        reqText = req.ShortDescription(ability);
+
+                        if (reqText == null || reqText.Length == 0) continue;
+                        string[] reqLines = reqText.Split('\n');
+
+                        bool isFulfilled = req.IsFulfilled(ability, ability.Tier + 1);
+                        drawSetColor(isFulfilled? c_lime : c_red);
+
+                        ExclusiveAbilityRequirement exReq = req as ExclusiveAbilityRequirement;
+                        if (exReq != null)
+                            drawSetColor(isFulfilled? c_grey : c_red);
+
+                        foreach (string reqLine in reqLines) {
+                            if (reqLine.Length == 0) continue;
+                            drawTextFont(fSubtitle, reqLine, tooltipX + _ui(8), tooltipY);
+                            tooltipY += fSubtitle.getLineHeight() + _ui(2);
+                        }
+
+                        drawSetColor(c_white);
+
+                        tooltipY += _ui(4);
+                    }
+                }
+
+                float actX = windowWidth  - padd - _ui(16);
+                float actY = windowHeight - padd - _ui( 8);
+
+                drawSetColor(c_grey);
+                Vector2 _mouseRsize = drawTextFont(fSubtitle, Lang.GetUnformatted("xskillgilded:actionUnlearn"), actX, actY, HALIGN.Right, VALIGN.Bottom);
+                drawImage(Sprite("elements", "mouse_right"), actX - _mouseRsize.X / 2 - _ui(64 / 2), actY - _ui(32 + 16), _ui(64), _ui(32));
+                actX -= _mouseRsize.X + _ui(16);
+
+                Vector2 _mouseLsize = drawTextFont(fSubtitle, Lang.GetUnformatted("xskillgilded:actionLearn"), actX, actY, HALIGN.Right, VALIGN.Bottom);
+                drawImage(Sprite("elements", "mouse_left"),  actX - _mouseLsize.X / 2 - _ui(64 / 2), actY - _ui(32 + 16), _ui(64), _ui(32));
+                actX -= _mouseLsize.X + _ui(16);
+                drawSetColor(c_white);
+            }
+
+            hoveringTooltip = null;
         }
 
         private string formatAbilityDescription(Ability ability, int currTier) {
