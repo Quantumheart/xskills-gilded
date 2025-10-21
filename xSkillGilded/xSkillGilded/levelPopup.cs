@@ -38,9 +38,10 @@ public class LevelPopup
         var window = api.Gui.WindowBounds;
         var screenWidth = (float)window.OuterWidth;
         var screenHeight = (float)window.OuterHeight;
+        var viewport = ImGui.GetMainViewport();
 
-        var wx = screenWidth / 2 - windowWidth / 2;
-        var wy = _ui(8);
+        float wx = viewport.Pos.X + (viewport.Size.X - windowWidth) / 2;
+        float wy = viewport.Pos.Y + _ui(8);
 
         ImGui.SetNextWindowSize(new Vector2(windowWidth, windowHeight));
         ImGui.SetNextWindowPos(new Vector2(wx, wy));
