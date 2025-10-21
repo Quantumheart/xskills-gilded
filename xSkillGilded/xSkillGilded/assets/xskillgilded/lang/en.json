@@ -1,25 +1,20 @@
 {
-    "specialization": "Specialization",
-
-    "pointsAvailable": "{0} Points Available",
-    "unlearnPoints": "Unlearn Points", 
-
-    "expBonusTitle": "Exp Bonus", 
-    "expBonusDesc": "Experience point bonus/penalty from your current class.<br><br>Class Effect: {0}<br>Total Effect: {1}<br>", 
-    "unlearnTitle": "Unlearning Ability",
-    "unlearnDesc": "You can unlearn an ability by <font color=\"feae34\">right clicking</font> on the ability.<br><br>Unlearning requires unlearn point which you can acquired by consuming specific items (see handbook for more details).<br><br>Unlearning have a <font color=\"feae34\">{0}</font> cooldown before you can unlearn again.", 
-    "sparringTitle": "Sparring Mode",
-    "sparringDesc": "Sparring Mode allows two players to kill each other without losing experience points. Both players need to enable sparring mode before fighting.",
-
-    "abilityLevelRequired": "Requires {0} Level {1}",
-    "actionLearn": "Learn",
-    "actionUnlearn": "Unlearn",
-
-    "lvPopupEnabled": "Enable Levelup popup",
-    "effectBoxEnabled": "Enable Effect box", 
-    "effectBoxOriginX": "Effect box origin X",
-    "effectBoxOriginY": "Effect box origin Y",
-    "effectBoxSize": "Effect box size",
-    "effectBoxOrientation": "Effect box orientation",
-
+  "specialization": "Specialization",
+  "pointsAvailable": "{0} Points Available",
+  "unlearnPoints": "Unlearn Points",
+  "expBonusTitle": "Exp Bonus",
+  "expBonusDesc": "Experience point bonus/penalty from your current class.<br><br>Class Effect: {0}<br>Total Effect: {1}<br>",
+  "unlearnTitle": "Unlearning Ability",
+  "unlearnDesc": "You can unlearn an ability by <font color=\"feae34\">right clicking</font> on the ability.<br><br>Unlearning requires unlearn point which you can acquired by consuming specific items (see handbook for more details).<br><br>Unlearning have a <font color=\"feae34\">{0}</font> cooldown before you can unlearn again.",
+  "sparringTitle": "Sparring Mode",
+  "sparringDesc": "Sparring Mode allows two players to kill each other without losing experience points. Both players need to enable sparring mode before fighting.",
+  "abilityLevelRequired": "Requires {0} Level {1}",
+  "actionLearn": "Learn",
+  "actionUnlearn": "Unlearn",
+  "lvPopupEnabled": "Enable Levelup popup",
+  "effectBoxEnabled": "Enable Effect box",
+  "effectBoxOriginX": "Effect box origin X",
+  "effectBoxOriginY": "Effect box origin Y",
+  "effectBoxSize": "Effect box size",
+  "effectBoxOrientation": "Effect box orientation"
 }

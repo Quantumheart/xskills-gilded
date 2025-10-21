@@ -2,7 +2,9 @@
   "type": "code",
   "modid": "xskillgilded",
   "name": "xSkill Gilded",
-  "authors": [ "MakhamDev" ],
+  "authors": [
+    "MakhamDev"
+  ],
   "description": "Add a new, fancy GUI for xSkill.",
   "version": "1.1.0",
   "dependencies": {
