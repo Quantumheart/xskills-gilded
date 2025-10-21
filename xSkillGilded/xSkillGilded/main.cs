@@ -446,59 +446,8 @@ namespace xSkillGilded {
             #endregion
 
             #region Skills Tab
-            float skx = padd;
-            float sky = bty + bth + _ui(4);
-            float skw = (windowWidth - padd * 2) / currentSkills.Count;
+            float sky = DrawSkillsTab(padd, bty, bth, windowWidth, ref _hoveringID);
             float skh = _ui(32);
-
-            if(!metaPage) {
-                for(int i = 0; i < currentSkills.Count; i++) {
-                    PlayerSkill skill = currentSkills[i];
-                    string skillName = skill.Skill.DisplayName;
-                    float skxc = skx + skw / 2;
-                    float skww = skw * .5f / 2;
-                    Vector4 color = new Vector4(1,1,1,1);
-                    Font _fTitle = fSubtitle;
-
-                    if(i != skillPage) {
-                        if (mouseHover(skx, sky, skx + skw, sky + skh)) {
-                            _hoveringID = skillName;
-                            drawImage(Sprite("elements", "tab_sep_hover"), skxc - skww, sky + skh - 4, skww * 2, 4);  
-                            if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
-                                setSkillPage(i);
-                                api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/pagesub.ogg"), false, .3f);
-                            }
-
-                        } else {
-                            drawImage(Sprite("elements", "tab_sep"), skxc - skww, sky + skh - 4, skww * 2, 4);
-                            color.W = .5f;
-                        }
-                    
-                    } else {
-                        drawImage(Sprite("elements", "tab_sep_selected"), skxc - skww, sky + skh - 4, skww * 2, 4);
-                        _fTitle = fSubtitleGold;
-                    }
-                
-                    drawSetColor(color);
-                    Vector2 skillName_size = drawTextFont(_fTitle, skillName, skx + skw / 2, sky + skh / 2, HALIGN.Center, VALIGN.Center);
-                    drawSetColor(c_white);
-
-                    float points = skill.AbilityPoints;
-                    if(points > 0) {
-                        float _pax = skxc + skillName_size.X / 2 + _ui(20);
-                        float _pay = sky + skh / 2;
-
-                        string pointsText = points.ToString();
-                        Vector2 pointsText_size = fSubtitle.CalcTextSize(pointsText);
-                        drawSetColor(c_lime, .3f);
-                        drawImage9patch(Sprite("elements", "glow"), _pax - 16, _pay - pointsText_size.Y / 2 - 12, pointsText_size.X + 32, pointsText_size.Y + 24, 15);
-                        drawSetColor(c_white);
-                        drawTextFont(fSubtitle, pointsText, _pax, _pay, HALIGN.Left, VALIGN.Center);
-                    }
-
-                    skx += skw;
-                }
-            }
             #endregion
 
             #region Ability
@@ -971,6 +920,64 @@ namespace xSkillGilded {
             }
 
             return bty + bth;
+        }
+
+        private float DrawSkillsTab(float padd, float bty, float bth, int windowWidth, ref string _hoveringID) {
+            float skx = padd;
+            float sky = bty + bth + _ui(4);
+            float skw = (windowWidth - padd * 2) / currentSkills.Count;
+            float skh = _ui(32);
+
+            if(!metaPage) {
+                for(int i = 0; i < currentSkills.Count; i++) {
+                    PlayerSkill skill = currentSkills[i];
+                    string skillName = skill.Skill.DisplayName;
+                    float skxc = skx + skw / 2;
+                    float skww = skw * .5f / 2;
+                    Vector4 color = new Vector4(1,1,1,1);
+                    Font _fTitle = fSubtitle;
+
+                    if(i != skillPage) {
+                        if (mouseHover(skx, sky, skx + skw, sky + skh)) {
+                            _hoveringID = skillName;
+                            drawImage(Sprite("elements", "tab_sep_hover"), skxc - skww, sky + skh - 4, skww * 2, 4);
+                            if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
+                                setSkillPage(i);
+                                api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/pagesub.ogg"), false, .3f);
+                            }
+
+                        } else {
+                            drawImage(Sprite("elements", "tab_sep"), skxc - skww, sky + skh - 4, skww * 2, 4);
+                            color.W = .5f;
+                        }
+
+                    } else {
+                        drawImage(Sprite("elements", "tab_sep_selected"), skxc - skww, sky + skh - 4, skww * 2, 4);
+                        _fTitle = fSubtitleGold;
+                    }
+
+                    drawSetColor(color);
+                    Vector2 skillName_size = drawTextFont(_fTitle, skillName, skx + skw / 2, sky + skh / 2, HALIGN.Center, VALIGN.Center);
+                    drawSetColor(c_white);
+
+                    float points = skill.AbilityPoints;
+                    if(points > 0) {
+                        float _pax = skxc + skillName_size.X / 2 + _ui(20);
+                        float _pay = sky + skh / 2;
+
+                        string pointsText = points.ToString();
+                        Vector2 pointsText_size = fSubtitle.CalcTextSize(pointsText);
+                        drawSetColor(c_lime, .3f);
+                        drawImage9patch(Sprite("elements", "glow"), _pax - 16, _pay - pointsText_size.Y / 2 - 12, pointsText_size.X + 32, pointsText_size.Y + 24, 15);
+                        drawSetColor(c_white);
+                        drawTextFont(fSubtitle, pointsText, _pax, _pay, HALIGN.Left, VALIGN.Center);
+                    }
+
+                    skx += skw;
+                }
+            }
+
+            return sky + skh;
         }
 
         private string formatAbilityDescription(Ability ability, int currTier) {
