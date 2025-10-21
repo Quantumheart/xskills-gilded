@@ -9,10 +9,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Server;
 using Vintagestory.Client.NoObf;
-using Vintagestory.Common;
-using Vintagestory.GameContent;
 using VSImGui;
 using VSImGui.API;
 using XLib.XLeveling;
@@ -55,14 +52,14 @@ namespace xSkillGilded {
         List<float> levelRequirementBars;
         List<DecorationLine> decorationLines;
 
-        float abiliyPageWidth  = 0;
-        float abiliyPageHeight = 0;
-        float buttonWidth      = 128;
-        float buttonHeight     = 100;
-        float buttonPad        =  16;
+        private float _abilityPageWidth  = 0;
+        private float _abilityPageHeight = 0;
+        private float buttonWidth      = 128;
+        private float buttonHeight     = 100;
+        private float buttonPad        =  16;
 
-        float tooltipWidth   = 400;
-        float contentPadding = 16;
+        private float tooltipWidth   = 400;
+        private float contentPadding = 16;
 
         string page = "";
         int skillPage = 0;
@@ -74,6 +71,7 @@ namespace xSkillGilded {
         string hoveringID = null;
 
         EffectBox effectBox;
+        private ImGuiViewportPtr _viewPort;
 
         public override bool ShouldLoad(EnumAppSide forSide) { return forSide == EnumAppSide.Client; }
         public override double ExecuteOrder() { return 1; }
@@ -81,7 +79,9 @@ namespace xSkillGilded {
         public override void StartClientSide(ICoreClientAPI api) {
             this.api = api;
             resourceLoader.setApi(api);
-
+            var mainViewport = ImGui.GetMainViewport();
+            this._viewPort = mainViewport;
+            
             try {
                 config = api.LoadModConfig<ModConfig>(configFileName);
                 if (config == null)
@@ -311,8 +311,8 @@ namespace xSkillGilded {
                 button.y -= cy;
             }
 
-            abiliyPageWidth  = maxx - minx;
-            abiliyPageHeight = maxy - miny;
+            _abilityPageWidth  = maxx - minx;
+            _abilityPageHeight = maxy - miny;
 
             levelRequirementBars = new List<float> ();
             for(int i = 0; i < levelTiers.Count; i++) {
@@ -393,11 +393,11 @@ namespace xSkillGilded {
                 button.y -= cy;
             }
             
-            abiliyPageWidth  = maxx - minx;
-            abiliyPageHeight = maxy - miny;
+            _abilityPageWidth  = maxx - minx;
+            _abilityPageHeight = maxy - miny;
         }
 
-        public CallbackGUIStatus Draw(float deltaSecnds) {
+        private CallbackGUIStatus Draw(float deltaSeconds) {
             if(!isOpen) return CallbackGUIStatus.Closed;
 
             ElementBounds window = api.Gui.WindowBounds;
@@ -420,16 +420,15 @@ namespace xSkillGilded {
 
             int windowWidth  = Math.Min(windowBaseWidth,  (int)window.OuterWidth  - 128); // 160
             int windowHeight = Math.Min(windowBaseHeight, (int)window.OuterHeight - 128); // 160
-            windowX = (int)window.absOffsetX + size.Width / 2 - windowWidth / 2;
-            windowY = (int)window.absOffsetY + size.Height / 2 - windowHeight / 2;
-            
-            windowPosX = windowX;
-            windowPosY = windowY;
 
             ImGui.SetNextWindowSize(new (windowWidth, windowHeight));
-            ImGui.SetNextWindowPos(new (windowX, windowY));
+            // ImGui.SetNextWindowPos(new (windowX, windowY));
+            ImGui.SetNextWindowPos(new Vector2(
+                _viewPort.Pos.X + (_viewPort.Size.X - windowWidth) / 2,
+                _viewPort.Pos.Y + (_viewPort.Size.Y - windowHeight) / 2
+            ));
             ImGuiWindowFlags flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoScrollbar
-                 | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground;
+                                                    | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground;
 
             ImGui.Begin("xSkill Gilded", flags);
             
@@ -588,14 +587,14 @@ namespace xSkillGilded {
             float bw  = _ui(buttonWidth);
             float bh  = _ui(buttonHeight);
 
-            float padX = Math.Max(0, _ui(abiliyPageWidth) - abw  + _ui(128));
-            float padY = Math.Max(0, _ui(abiliyPageHeight) - abh + _ui(128));
+            float padX = Math.Max(0, _ui(_abilityPageWidth) - abw  + _ui(128));
+            float padY = Math.Max(0, _ui(_abilityPageHeight) - abh + _ui(128));
             
             float mx = ImGui.GetMousePos().X;
             float my = ImGui.GetMousePos().Y;
 
-            float mrx = (mx - (windowX + abx)) / abw - .5f;
-            float mry = (my - (windowY + aby)) / abh - .5f;
+            float mrx = (mx - (this._viewPort.Pos.X + abx)) / abw - .5f;
+            float mry = (my - (this._viewPort.Pos.Y + aby)) / abh - .5f;
 
             float ofmx = (float)Math.Round(-padX * mrx);
             float ofmy = (float)Math.Round(-padY * mry);
@@ -612,7 +611,7 @@ namespace xSkillGilded {
                 
                 for(int i = 1; i < levelRequirementBars.Count; i++) {
                     float lv = levelRequirementBars[i];
-                    float _y = offy + _ui(abiliyPageHeight / 2 - i * (buttonHeight + buttonPad) + buttonPad / 2);
+                    float _y = offy + _ui(_abilityPageHeight / 2 - i * (buttonHeight + buttonPad) + buttonPad / 2);
 
                     if (mouseHover(lvx, _y - buttonHeight - buttonPad, lvx + abw, _y))
                         drawSetColor(new(239/255f, 183/255f, 117/255f, 1));

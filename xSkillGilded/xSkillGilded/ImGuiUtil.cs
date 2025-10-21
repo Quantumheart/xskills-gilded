@@ -381,7 +381,8 @@ namespace xSkillGilded {
         #endregion
 
         #region IO
-        public static bool mouseHover(float x0, float y0, float x1, float y1) {
+        public static bool mouseHover(float x0, float y0, float x1, float y1)
+        {
             return ImGui.IsMouseHoveringRect(new (windowPosX + x0, windowPosY + y0), new (windowPosX + x1, windowPosY + y1));
         }
         #endregion
