@@ -42,12 +42,10 @@ namespace xSkillGilded {
         public CallbackGUIStatus Draw(float deltaSecnds) {
             if(!showing) return CallbackGUIStatus.DontGrabMouse;
 
-            ElementBounds window = api.Gui.WindowBounds;
-            float screenWidth  = (float)window.OuterWidth;
-            float screenHeight = (float)window.OuterHeight;
-            
-            float wx = screenWidth / 2 - windowWidth / 2;
-            float wy = _ui(8);
+            var viewport = ImGui.GetMainViewport();
+
+            float wx = viewport.Pos.X + (viewport.Size.X - windowWidth) / 2;
+            float wy = viewport.Pos.Y + _ui(8);
 
             ImGui.SetNextWindowSize(new (windowWidth, windowHeight));
             ImGui.SetNextWindowPos(new (wx, wy));
