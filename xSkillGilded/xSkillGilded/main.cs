@@ -455,61 +455,7 @@ namespace xSkillGilded {
             #endregion
 
             #region Skills Description
-            float sdx = padd + _ui(16);
-            float sdy = sky + skh + _ui(16);
-            float sdw = _ui(200);
-
-            if(page == "_Specialize") {
-                string skillTitle = Lang.GetUnformatted("xlib:specialisations");
-                Vector2 skillTitle_size = drawTextFont(fTitleGold, skillTitle, sdx, sdy);
-                sdy += fTitleGold.getLineHeight() + _ui(8);
-
-                foreach(PlayerSkill skill in allSkills) {
-                    float hh = drawSkillLevelDetail(skill, sdx, sdy, sdw, false);
-                    sdy += hh;
-                }
-
-
-            } else {
-                float hh = drawSkillLevelDetail(currentPlayerSkill, sdx, sdy, sdw, true);
-                sdy += hh;
-                
-                float unlearnPoint    = currentPlayerSkill.PlayerSkillSet.UnlearnPoints;
-                float unlearnPointReq = xLevelingClient.GetPointsForUnlearn();
-                float unlearnAmount   = (float)Math.Floor(unlearnPoint / unlearnPointReq);
-                float unlearnProgress = unlearnPoint / unlearnPointReq - unlearnAmount;
-                float unx = sdx + sdw - _ui(8);
-                float uny = sdy;
-                
-                drawSetColor(c_red);
-                drawTextFont(fSubtitle, Lang.GetUnformatted("xlib:unlearnpoints"), sdx, sdy);
-
-                if(unlearnAmount > 0) {
-                    Vector2 unlearnPoint_size = fSubtitle.CalcTextSize(unlearnAmount.ToString());
-                    drawSetColor(c_red, .3f);
-                    drawImage9patch(Sprite("elements", "glow"), unx - unlearnPoint_size.X - 16, sdy - 12, unlearnPoint_size.X + 32, unlearnPoint_size.Y + 24, 15);
-                    drawSetColor(c_white);
-                }
-                drawTextFont(fSubtitle, unlearnAmount.ToString(), unx, sdy, HALIGN.Right);
-                
-                sdy += fSubtitle.getLineHeight();
-                drawProgressBar(unlearnProgress, sdx, sdy, sdw, _ui(4), c_dkgrey, c_red);
-                sdy += _ui(4);
-                
-                float unlearnCooldown    = currentPlayerSkill.PlayerSkillSet.UnlearnCooldown;
-                float unlearnCooldownMax = xLevelingClient.Config.unlearnCooldown;
-                if(unlearnCooldown > 0) {
-                    drawSetColor(c_grey);
-                    drawTextFont(fSubtitle, "Cooldown", sdx, sdy);
-                    drawTextFont(fSubtitle, FormatTime((float)Math.Round(unlearnCooldown)), unx, sdy, HALIGN.Right);
-                    drawSetColor(c_white);
-                }
-                
-                if(mouseHover(sdx, uny - 4, sdx + sdw, sdy + 4)) {
-                    string desc = string.Format(Lang.GetUnformatted("xskillgilded:unlearnDesc"), FormatTime(unlearnCooldownMax * 60f));
-                    hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:unlearnTitle"), desc);
-                }
-            }
+            DrawSkillsDescription(padd, sky, skh);
             #endregion
 
             #region Skills actions
@@ -982,6 +928,64 @@ namespace xSkillGilded {
             ImGui.EndChild();
             windowPosX = windowX;
             windowPosY = windowY;
+        }
+
+        private void DrawSkillsDescription(float padd, float sky, float skh) {
+            float sdx = padd + _ui(16);
+            float sdy = sky + skh + _ui(16);
+            float sdw = _ui(200);
+
+            if(page == "_Specialize") {
+                string skillTitle = Lang.GetUnformatted("xlib:specialisations");
+                Vector2 skillTitle_size = drawTextFont(fTitleGold, skillTitle, sdx, sdy);
+                sdy += fTitleGold.getLineHeight() + _ui(8);
+
+                foreach(PlayerSkill skill in allSkills) {
+                    float hh = drawSkillLevelDetail(skill, sdx, sdy, sdw, false);
+                    sdy += hh;
+                }
+
+
+            } else {
+                float hh = drawSkillLevelDetail(currentPlayerSkill, sdx, sdy, sdw, true);
+                sdy += hh;
+
+                float unlearnPoint    = currentPlayerSkill.PlayerSkillSet.UnlearnPoints;
+                float unlearnPointReq = xLevelingClient.GetPointsForUnlearn();
+                float unlearnAmount   = (float)Math.Floor(unlearnPoint / unlearnPointReq);
+                float unlearnProgress = unlearnPoint / unlearnPointReq - unlearnAmount;
+                float unx = sdx + sdw - _ui(8);
+                float uny = sdy;
+
+                drawSetColor(c_red);
+                drawTextFont(fSubtitle, Lang.GetUnformatted("xlib:unlearnpoints"), sdx, sdy);
+
+                if(unlearnAmount > 0) {
+                    Vector2 unlearnPoint_size = fSubtitle.CalcTextSize(unlearnAmount.ToString());
+                    drawSetColor(c_red, .3f);
+                    drawImage9patch(Sprite("elements", "glow"), unx - unlearnPoint_size.X - 16, sdy - 12, unlearnPoint_size.X + 32, unlearnPoint_size.Y + 24, 15);
+                    drawSetColor(c_white);
+                }
+                drawTextFont(fSubtitle, unlearnAmount.ToString(), unx, sdy, HALIGN.Right);
+
+                sdy += fSubtitle.getLineHeight();
+                drawProgressBar(unlearnProgress, sdx, sdy, sdw, _ui(4), c_dkgrey, c_red);
+                sdy += _ui(4);
+
+                float unlearnCooldown    = currentPlayerSkill.PlayerSkillSet.UnlearnCooldown;
+                float unlearnCooldownMax = xLevelingClient.Config.unlearnCooldown;
+                if(unlearnCooldown > 0) {
+                    drawSetColor(c_grey);
+                    drawTextFont(fSubtitle, "Cooldown", sdx, sdy);
+                    drawTextFont(fSubtitle, FormatTime((float)Math.Round(unlearnCooldown)), unx, sdy, HALIGN.Right);
+                    drawSetColor(c_white);
+                }
+
+                if(mouseHover(sdx, uny - 4, sdx + sdw, sdy + 4)) {
+                    string desc = string.Format(Lang.GetUnformatted("xskillgilded:unlearnDesc"), FormatTime(unlearnCooldownMax * 60f));
+                    hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:unlearnTitle"), desc);
+                }
+            }
         }
 
         private string formatAbilityDescription(Ability ability, int currTier) {
