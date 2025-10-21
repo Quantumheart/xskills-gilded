@@ -20,87 +20,87 @@ namespace xSkillGilded {
         public static ModConfig config;
         public const string configFileName = "xskillsgilded.json";
 
-        private ICoreClientAPI api;
-        private ImGuiModSystem imguiModSystem;
+        private ICoreClientAPI _api;
+        private ImGuiModSystem _imguiModSystem;
 
-        ImFontPtr FTitle;
+        ImFontPtr _fTitle;
 
-        XLeveling xLeveling;
-        XLevelingClient xLevelingClient;
-        Dictionary<string, List<PlayerSkill>> skillGroups;
-        List<PlayerSkill> allSkills;
-        List<PlayerSkill> currentSkills;
-        List<PlayerAbility> specializeGroups;
-        PlayerSkill currentPlayerSkill;
+        XLeveling _xLeveling;
+        XLevelingClient _xLevelingClient;
+        Dictionary<string, List<PlayerSkill>> _skillGroups;
+        List<PlayerSkill> _allSkills;
+        List<PlayerSkill> _currentSkills;
+        List<PlayerAbility> _specializeGroups;
+        PlayerSkill _currentPlayerSkill;
 
-        Dictionary<PlayerSkill, int> previousLevels;
+        Dictionary<PlayerSkill, int> _previousLevels;
         
         const int checkAPIInterval   = 1000;
         const int checkLevelInterval = 100;
-        private long checkAPIID, checkLevelID;
-        bool isReady = false;
+        private long _checkAPIID, _checkLevelID;
+        bool _isReady = false;
 
-        bool metaPage = false;
+        bool _metaPage = false;
         public bool isOpen = false;
-        int windowX      = 0;
-        int windowY      = 0;
-        int windowBaseWidth  = 1800;
-        int windowBaseHeight = 1060;
-        Stopwatch stopwatch;
+        int _windowX      = 0;
+        int _windowY      = 0;
+        int _windowBaseWidth  = 1800;
+        int _windowBaseHeight = 1060;
+        Stopwatch _stopwatch;
         
-        Dictionary<string, AbilityButton> abilityButtons;
-        List<float> levelRequirementBars;
-        List<DecorationLine> decorationLines;
+        Dictionary<string, AbilityButton> _abilityButtons;
+        List<float> _levelRequirementBars;
+        List<DecorationLine> _decorationLines;
 
         private float _abilityPageWidth  = 0;
         private float _abilityPageHeight = 0;
-        private float buttonWidth      = 128;
-        private float buttonHeight     = 100;
-        private float buttonPad        =  16;
+        private float _buttonWidth      = 128;
+        private float _buttonHeight     = 100;
+        private float _buttonPad        =  16;
 
-        private float tooltipWidth   = 400;
-        private float contentPadding = 16;
+        private float _tooltipWidth   = 400;
+        private float _contentPadding = 16;
 
-        string page = "";
-        int skillPage = 0;
+        string _page = "";
+        int _skillPage = 0;
 
-        string currentTooltip = "";
-        List<VTMLblock> tooltipVTML;
-        AbilityButton hoveringButton;
-        TooltipObject hoveringTooltip = null;
-        string hoveringID = null;
+        string _currentTooltip = "";
+        List<VTMLblock> _tooltipVTML;
+        AbilityButton _hoveringButton;
+        TooltipObject _hoveringTooltip = null;
+        string _hoveringID = null;
 
-        EffectBox effectBox;
+        EffectBox _effectBox;
         private ImGuiViewportPtr _viewPort;
 
         public override bool ShouldLoad(EnumAppSide forSide) { return forSide == EnumAppSide.Client; }
         public override double ExecuteOrder() { return 1; }
         
         public override void StartClientSide(ICoreClientAPI api) {
-            this.api = api;
+            this._api = api;
             resourceLoader.setApi(api);
             var mainViewport = ImGui.GetMainViewport();
             this._viewPort = mainViewport;
             
             try {
-                config = api.LoadModConfig<ModConfig>(configFileName);
+                config = _api.LoadModConfig<ModConfig>(configFileName);
                 if (config == null)
                     config = new ModConfig();
 
-                api.StoreModConfig<ModConfig>(config, configFileName);
+                _api.StoreModConfig<ModConfig>(config, configFileName);
 
             } catch (Exception e) {
                 config = new ModConfig();
             }
 
-            //api.Logger.Debug("CONFIG: " + config.ToString());
+            //_api.Logger.Debug("CONFIG: " + config.ToString());
 
-            api.Input.RegisterHotKey("xSkillGilded", "Show/Hide Skill Dialog - Gilded", GlKeys.O, HotkeyType.GUIOrOtherControls);
-            api.Input.SetHotKeyHandler("xSkillGilded", Toggle);
+            _api.Input.RegisterHotKey("xSkillGilded", "Show/Hide Skill Dialog - Gilded", GlKeys.O, HotkeyType.GUIOrOtherControls);
+            _api.Input.SetHotKeyHandler("xSkillGilded", Toggle);
 
-            imguiModSystem = api.ModLoader.GetModSystem<ImGuiModSystem>();
-            imguiModSystem.Draw   += Draw;
-            imguiModSystem.Closed += Close;
+            _imguiModSystem = _api.ModLoader.GetModSystem<ImGuiModSystem>();
+            _imguiModSystem.Draw   += Draw;
+            _imguiModSystem.Closed += Close;
 
             fTitle        = new Font().LoadedTexture(api, Sprite("fonts", "scarab"), FontData.SCARAB).setLetterSpacing(2);
             fTitleGold    = new Font().LoadedTexture(api, Sprite("fonts", "scarab_gold"), FontData.SCARAB).setLetterSpacing(2).setFallbackColor(c_gold);
@@ -115,17 +115,17 @@ namespace xSkillGilded {
                 fSubtitleGold.baseLineHeight = ImGui.GetTextLineHeight();
             }
 
-            tooltipVTML   = new List<VTMLblock>();
+            _tooltipVTML   = new List<VTMLblock>();
 
             // probably the corecct way to load font
             // FontManager.BeforeFontsLoaded += initFonts;
             // FTitle = FontManager.Fonts["scarab"];
 
-            stopwatch    = Stopwatch.StartNew();
-            checkAPIID   = api.Event.RegisterGameTickListener(onCheckAPI,   checkAPIInterval);
-            checkLevelID = api.Event.RegisterGameTickListener(onCheckLevel, checkLevelInterval);
+            _stopwatch    = Stopwatch.StartNew();
+            _checkAPIID   = _api.Event.RegisterGameTickListener(onCheckAPI,   checkAPIInterval);
+            _checkLevelID = _api.Event.RegisterGameTickListener(onCheckLevel, checkLevelInterval);
 
-            effectBox = new(api);
+            _effectBox = new(api);
         }
 
         public void initFonts(HashSet<string> fonts, HashSet<int> sizes) {
@@ -133,57 +133,57 @@ namespace xSkillGilded {
         }
 
         public void onCheckAPI(float dt) {
-            if(getSkillData()) isReady = true;
-            if(isReady) api.Event.UnregisterGameTickListener(checkAPIID);
+            if(getSkillData()) _isReady = true;
+            if(_isReady) _api.Event.UnregisterGameTickListener(_checkAPIID);
         }
 
         public void onCheckLevel(float dt) {
-            if(previousLevels == null) return;
+            if(_previousLevels == null) return;
             if(!config.lvPopupEnabled) return;
 
-            foreach(PlayerSkill skill in previousLevels.Keys) {
+            foreach(PlayerSkill skill in _previousLevels.Keys) {
                 int currentLevel = skill.Level;
 
-                if(currentLevel > previousLevels[skill]) {
+                if(currentLevel > _previousLevels[skill]) {
                     LevelPopup levelPopup = new(api, skill);
-                    api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/levelup.ogg"), false, .3f);
-                    api.Logger.Debug($"{skill.Skill.Name}, {skill.Skill.Id} Level up");
+                    _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/levelup.ogg"), false, .3f);
+                    _api.Logger.Debug($"{skill.Skill.Name}, {skill.Skill.Id} Level up");
                 }
 
-                previousLevels[skill] = currentLevel;
+                _previousLevels[skill] = currentLevel;
             }
         }
 
         private bool getSkillData() {
-            xLeveling        = api.ModLoader.GetModSystem<XLeveling>();
-            if(xLeveling == null) return false;
+            _xLeveling        = _api.ModLoader.GetModSystem<XLeveling>();
+            if(_xLeveling == null) return false;
 
-            xLevelingClient  = xLeveling.IXLevelingAPI as XLevelingClient;
-            if(xLevelingClient == null) return false;
+            __xLevelingClient  = _xLeveling.IXLevelingAPI as XLevelingClient;
+            if(__xLevelingClient == null) return false;
 
-            effectBox.xLeveling = xLeveling;
-            effectBox.xLevelingClient = xLevelingClient;
+            _effectBox._xLeveling = _xLeveling;
+            _effectBox.__xLevelingClient = __xLevelingClient;
 
-            PlayerSkillSet playerSkillSet = xLevelingClient.LocalPlayerSkillSet;
+            PlayerSkillSet playerSkillSet = __xLevelingClient.LocalPlayerSkillSet;
             if(playerSkillSet == null) return false;
 
-            skillGroups      = new Dictionary<string, List<PlayerSkill>>();
-            previousLevels   = new Dictionary<PlayerSkill, int>();
-            allSkills        = new List<PlayerSkill>();
-            specializeGroups = new List<PlayerAbility>();
+            _skillGroups      = new Dictionary<string, List<PlayerSkill>>();
+            _previousLevels   = new Dictionary<PlayerSkill, int>();
+            _allSkills        = new List<PlayerSkill>();
+            _specializeGroups = new List<PlayerAbility>();
 
             bool firstGroup = true;
             foreach (PlayerSkill skill in playerSkillSet.PlayerSkills) {
                 if (skill.Skill.Enabled && !skill.Hidden && skill.PlayerAbilities.Count > 0) {
                     string groupName = skill.Skill.Group;
 
-                    if (!skillGroups.ContainsKey(groupName))
-                        skillGroups[groupName] = new List<PlayerSkill>();
+                    if (!_skillGroups.ContainsKey(groupName))
+                        _skillGroups[groupName] = new List<PlayerSkill>();
                     
-                    List<PlayerSkill> groupList = skillGroups[groupName];
+                    List<PlayerSkill> groupList = _skillGroups[groupName];
                     groupList.Add(skill);
-                    allSkills.Add(skill);
-                    previousLevels[skill] = skill.Level;
+                    _allSkills.Add(skill);
+                    _previousLevels[skill] = skill.Level;
 
                     if (firstGroup) {
                         setPage(groupName);
@@ -194,7 +194,7 @@ namespace xSkillGilded {
                         Ability ability = playerAbility.Ability;
                         foreach(Requirement req in ability.Requirements) {
                             if(IsAbilityLimited(req)) {
-                                specializeGroups.Add(playerAbility);
+                                _specializeGroups.Add(playerAbility);
                                 break;
                             }
                         }
@@ -208,38 +208,38 @@ namespace xSkillGilded {
 
         private void setPage(string page) {
             if(page == "_Specialize") {
-                this.page = "_Specialize";
-                metaPage  = true;
+                this._page = "_Specialize";
+                _metaPage  = true;
 
-                setPageContentList(specializeGroups);
+                setPageContentList(_specializeGroups);
                 return;
             }
 
-            if (!skillGroups.ContainsKey(page)) return;
+            if (!_skillGroups.ContainsKey(page)) return;
 
-            metaPage  = false;
-            this.page = page;
-            currentSkills = skillGroups[page];
+            _metaPage  = false;
+            this._page = page;
+            _currentSkills = _skillGroups[page];
             setSkillPage(0);
         }
 
         private void setSkillPage(int page) {
-            if (page < 0 || page >= currentSkills.Count) return;
-            skillPage = page;
-            currentPlayerSkill = currentSkills[page];
+            if (page < 0 || page >= _currentSkills.Count) return;
+            _skillPage = page;
+            _currentPlayerSkill = _currentSkills[page];
 
             setPageContent();
         }
 
         private void setPageContent() {
-            abilityButtons = new Dictionary<string, AbilityButton>();
+            _abilityButtons = new Dictionary<string, AbilityButton>();
 
-            float pad = buttonPad;
+            float pad = _buttonPad;
 
             List<int> levelTiers  = new List<int>();
             List<int> buttonTiers = new List<int>();
 
-            foreach (PlayerAbility ability in currentPlayerSkill.PlayerAbilities) {
+            foreach (PlayerAbility ability in _currentPlayerSkill.PlayerAbilities) {
                 if(!ability.IsVisible()) continue;
                 int lv = ability.Ability.RequiredLevel(1);
 
@@ -253,7 +253,7 @@ namespace xSkillGilded {
                 if (levelTiers[i] > 0) j++;
             }
 
-            foreach (PlayerAbility ability in currentPlayerSkill.PlayerAbilities) {
+            foreach (PlayerAbility ability in _currentPlayerSkill.PlayerAbilities) {
                 if(!ability.IsVisible()) continue;
                 string name = ability.Ability.Name;
                 
@@ -266,7 +266,7 @@ namespace xSkillGilded {
                 AbilityButton button = new AbilityButton(ability);
 
                 button.tier = tier;
-                abilityButtons[name] = button;
+                _abilityButtons[name] = button;
             }
             
             Dictionary<int, int> buttonTierMap = new Dictionary<int, int>();
@@ -278,13 +278,13 @@ namespace xSkillGilded {
                 tierX.Add(0);
             }
 
-            foreach (AbilityButton button in abilityButtons.Values) {
+            foreach (AbilityButton button in _abilityButtons.Values) {
                 int tier = buttonTierMap[button.tier];
                 int roww = buttonTiers[button.tier];
 
-                float _x = tierX[tier] - (roww - 1) / 2 * (buttonWidth + pad);
-                float _y = -tier * (buttonHeight + pad);
-                tierX[tier] += buttonWidth + pad;
+                float _x = tierX[tier] - (roww - 1) / 2 * (_buttonWidth + pad);
+                float _y = -tier * (_buttonHeight + pad);
+                tierX[tier] += _buttonWidth + pad;
 
                 button.x = _x;
                 button.y = _y;
@@ -295,18 +295,18 @@ namespace xSkillGilded {
             float maxx = -99999;
             float maxy = -99999;
 
-            foreach (AbilityButton button in abilityButtons.Values) {
+            foreach (AbilityButton button in _abilityButtons.Values) {
                 minx = Math.Min(minx, button.x);
                 miny = Math.Min(miny, button.y);
 
-                maxx = Math.Max(maxx, button.x + buttonWidth);
-                maxy = Math.Max(maxy, button.y + buttonHeight);
+                maxx = Math.Max(maxx, button.x + _buttonWidth);
+                maxy = Math.Max(maxy, button.y + _buttonHeight);
             }
 
             float cx = (minx + maxx) / 2;
             float cy = (miny + maxy) / 2;
 
-            foreach (AbilityButton button in abilityButtons.Values) {
+            foreach (AbilityButton button in _abilityButtons.Values) {
                 button.x -= cx;
                 button.y -= cy;
             }
@@ -314,15 +314,15 @@ namespace xSkillGilded {
             _abilityPageWidth  = maxx - minx;
             _abilityPageHeight = maxy - miny;
 
-            levelRequirementBars = new List<float> ();
+            _levelRequirementBars = new List<float> ();
             for(int i = 0; i < levelTiers.Count; i++) {
                 if (levelTiers[i] > 0) 
-                    levelRequirementBars.Add(i);
+                    _levelRequirementBars.Add(i);
             }
 
-            decorationLines = new List<DecorationLine>();
+            _decorationLines = new List<DecorationLine>();
 
-            foreach (AbilityButton button in abilityButtons.Values) {
+            foreach (AbilityButton button in _abilityButtons.Values) {
                 float x0 = button.x;
                 float y0 = button.y;
 
@@ -330,12 +330,12 @@ namespace xSkillGilded {
                     ExclusiveAbilityRequirement req2 = req as ExclusiveAbilityRequirement;
                     if(req2 != null) {
                         string name = req2.Ability.Name;
-                        if(abilityButtons.ContainsKey(name)) {
-                            AbilityButton _button = abilityButtons[name];
+                        if(_abilityButtons.ContainsKey(name)) {
+                            AbilityButton _button = _abilityButtons[name];
                             float x1 = _button.x;
                             float y1 = _button.y;
 
-                            decorationLines.Add(new(x0, y0, x1, y1, new(165/255f, 98/255f, 67/255f, .5f)));
+                            _decorationLines.Add(new(x0, y0, x1, y1, new(165/255f, 98/255f, 67/255f, .5f)));
                         }
                     }
                 }
@@ -343,11 +343,11 @@ namespace xSkillGilded {
         }
 
         private void setPageContentList(List<PlayerAbility> abilityList) {
-            abilityButtons = new Dictionary<string, AbilityButton>();
-            levelRequirementBars.Clear();
-            decorationLines.Clear();
+            _abilityButtons = new Dictionary<string, AbilityButton>();
+            _levelRequirementBars.Clear();
+            _decorationLines.Clear();
 
-            float pad  = buttonPad;
+            float pad  = _buttonPad;
 
             int amo  = abilityList.Count;
             int col  = (int)Math.Floor(Math.Sqrt((double)amo));
@@ -366,10 +366,10 @@ namespace xSkillGilded {
                 
                 AbilityButton button = new AbilityButton(ability);
 
-                button.x = c * (buttonWidth  + pad);
-                button.y = r * (buttonHeight + pad);
+                button.x = c * (_buttonWidth  + pad);
+                button.y = r * (_buttonHeight + pad);
 
-                abilityButtons[name] = button;
+                _abilityButtons[name] = button;
             }
 
             float minx =  99999;
@@ -377,18 +377,18 @@ namespace xSkillGilded {
             float maxx = -99999;
             float maxy = -99999;
 
-            foreach (AbilityButton button in abilityButtons.Values) {
+            foreach (AbilityButton button in _abilityButtons.Values) {
                 minx = Math.Min(minx, button.x);
                 miny = Math.Min(miny, button.y);
 
-                maxx = Math.Max(maxx, button.x + buttonWidth);
-                maxy = Math.Max(maxy, button.y + buttonHeight);
+                maxx = Math.Max(maxx, button.x + _buttonWidth);
+                maxy = Math.Max(maxy, button.y + _buttonHeight);
             }
 
             float cx = (minx + maxx) / 2;
             float cy = (miny + maxy) / 2;
 
-            foreach (AbilityButton button in abilityButtons.Values) {
+            foreach (AbilityButton button in _abilityButtons.Values) {
                 button.x -= cx;
                 button.y -= cy;
             }
@@ -400,8 +400,8 @@ namespace xSkillGilded {
         private CallbackGUIStatus Draw(float deltaSeconds) {
             if(!isOpen) return CallbackGUIStatus.Closed;
 
-            ElementBounds window = api.Gui.WindowBounds;
-            IXPlatformInterface xPlatform = api.Forms;
+            ElementBounds window = _api.Gui.WindowBounds;
+            IXPlatformInterface xPlatform = _api.Forms;
             Size2i size = xPlatform.GetScreenSize();
 
             uiScale = ClientSettings.GUIScale;
@@ -418,11 +418,11 @@ namespace xSkillGilded {
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,    0);
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding,    0);
 
-            int windowWidth  = Math.Min(windowBaseWidth,  (int)window.OuterWidth  - 128); // 160
-            int windowHeight = Math.Min(windowBaseHeight, (int)window.OuterHeight - 128); // 160
+            int windowWidth  = Math.Min(_windowBaseWidth,  (int)window.OuterWidth  - 128); // 160
+            int windowHeight = Math.Min(_windowBaseHeight, (int)window.OuterHeight - 128); // 160
 
             ImGui.SetNextWindowSize(new (windowWidth, windowHeight));
-            // ImGui.SetNextWindowPos(new (windowX, windowY));
+            // ImGui.SetNextWindowPos(new (_windowX, _windowY));
             ImGui.SetNextWindowPos(new Vector2(
                 _viewPort.Pos.X + (_viewPort.Size.X - windowWidth) / 2,
                 _viewPort.Pos.Y + (_viewPort.Size.Y - windowHeight) / 2
@@ -433,20 +433,20 @@ namespace xSkillGilded {
             ImGui.Begin("xSkill Gilded", flags);
             
             drawImage(Sprite("elements", "bg"), 0, 0, windowWidth, windowHeight);
-            float padd = _ui(contentPadding);
-            float contentWidth = windowWidth - _ui(tooltipWidth) - padd * 2;
-            float deltaTime    = stopwatch.ElapsedMilliseconds / 1000f;
-            stopwatch.Restart();
+            float padd = _ui(_contentPadding);
+            float contentWidth = windowWidth - _ui(_tooltipWidth) - padd * 2;
+            float deltaTime    = _stopwatch.ElapsedMilliseconds / 1000f;
+            _stopwatch.Restart();
 
-            string _hoveringID = null;
+            string __hoveringID = null;
 
             #region Skill Group Tab
-            float bty = DrawSkillGroupTab(padd, windowWidth, ref _hoveringID);
+            float bty = DrawSkillGroupTab(padd, windowWidth, ref __hoveringID);
             float bth = _ui(32);
             #endregion
 
             #region Skills Tab
-            float sky = DrawSkillsTab(padd, bty, bth, windowWidth, ref _hoveringID);
+            float sky = DrawSkillsTab(padd, bty, bth, windowWidth, ref __hoveringID);
             float skh = _ui(32);
             #endregion
 
@@ -459,15 +459,15 @@ namespace xSkillGilded {
             #endregion
 
             #region Skills actions
-            DrawSkillsActions(padd, windowHeight, ref _hoveringID);
+            DrawSkillsActions(padd, windowHeight, ref __hoveringID);
             #endregion
 
             #region Tooltip
             DrawTooltip(padd, sky, skh, windowWidth, windowHeight);
             #endregion
 
-            // if(_hoveringID != null && _hoveringID != hoveringID) api.Gui.PlaySound("tick", false, .5f); // too annoying
-            hoveringID = _hoveringID;
+            // if(__hoveringID != null && __hoveringID != _hoveringID) _api.Gui.PlaySound("tick", false, .5f); // too annoying
+            _hoveringID = __hoveringID;
 
             drawImage9patch(Sprite("elements", "frame"), 0, 0, windowWidth, windowHeight, 60);
 
@@ -476,7 +476,7 @@ namespace xSkillGilded {
             return CallbackGUIStatus.GrabMouse;
         }
 
-        private float DrawSkillGroupTab(float padd, int windowWidth, ref string _hoveringID) {
+        private float DrawSkillGroupTab(float padd, int windowWidth, ref string __hoveringID) {
             float btx = padd;
             float bty = padd;
             float bth = _ui(32);
@@ -486,17 +486,17 @@ namespace xSkillGilded {
             float btww   = _btsw * .5f / 2;
             float _alpha = 1f;
 
-            if(page == "_Specialize") {
+            if(_page == "_Specialize") {
                 drawImage(Sprite("elements", "tab_sep_selected"), btxc - btww, bty + bth - 4, btww * 2, 4);
                 _alpha = 1f;
 
             } else if (mouseHover(btx, bty, btx + _btsw, bty + bth)) {
-                _hoveringID = "_Specialize";
+                __hoveringID = "_Specialize";
                 drawImage(Sprite("elements", "tab_sep_hover"), btxc - btww, bty + bth - 4, btww * 2, 4);
                 _alpha = 1f;
                 if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
                     setPage("_Specialize");
-                    api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
+                    _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
                 }
 
             } else {
@@ -505,33 +505,33 @@ namespace xSkillGilded {
             }
 
             drawSetColor(c_white, _alpha);
-            drawImage(page == "_Specialize"? Sprite("elements", "meta_spec_selected") : Sprite("elements", "meta_spec"), btxc - _ui(24 / 2), bty + 4, _ui(24), _ui(24));
+            drawImage(_page == "_Specialize"? Sprite("elements", "meta_spec_selected") : Sprite("elements", "meta_spec"), btxc - _ui(24 / 2), bty + 4, _ui(24), _ui(24));
             drawSetColor(c_white);
             btx += _btsw;
 
-            float btw = (windowWidth - padd - btx) / skillGroups.Count;
+            float btw = (windowWidth - padd - btx) / _skillGroups.Count;
 
-            foreach(string groupName in skillGroups.Keys) {
+            foreach(string groupName in _skillGroups.Keys) {
                 btxc = btx + btw / 2;
                 btww = btw * .5f / 2;
                 float alpha = 1f;
                 Font _fTitle = fTitle;
 
                 int points = 0;
-                foreach(PlayerSkill skill in skillGroups[groupName]) {
+                foreach(PlayerSkill skill in _skillGroups[groupName]) {
                     points += skill.AbilityPoints;
                 }
 
-                if (groupName == page) {
+                if (groupName == _page) {
                     drawImage(Sprite("elements", "tab_sep_selected"), btxc - btww, bty + bth - 4, btww * 2, 4);
                     _fTitle = fTitleGold;
 
                 } else if (mouseHover(btx, bty, btx + btw, bty + bth)) {
-                    _hoveringID = groupName;
+                    __hoveringID = groupName;
                     drawImage(Sprite("elements", "tab_sep_hover"), btxc - btww, bty + bth - 4, btww * 2, 4);
                     if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
                         setPage(groupName);
-                        api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
+                        _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/page.ogg"), false, .3f);
                     }
 
                 } else {
@@ -561,28 +561,28 @@ namespace xSkillGilded {
             return bty + bth;
         }
 
-        private float DrawSkillsTab(float padd, float bty, float bth, int windowWidth, ref string _hoveringID) {
+        private float DrawSkillsTab(float padd, float bty, float bth, int windowWidth, ref string __hoveringID) {
             float skx = padd;
             float sky = bty + bth + _ui(4);
-            float skw = (windowWidth - padd * 2) / currentSkills.Count;
+            float skw = (windowWidth - padd * 2) / _currentSkills.Count;
             float skh = _ui(32);
 
-            if(!metaPage) {
-                for(int i = 0; i < currentSkills.Count; i++) {
-                    PlayerSkill skill = currentSkills[i];
+            if(!_metaPage) {
+                for(int i = 0; i < _currentSkills.Count; i++) {
+                    PlayerSkill skill = _currentSkills[i];
                     string skillName = skill.Skill.DisplayName;
                     float skxc = skx + skw / 2;
                     float skww = skw * .5f / 2;
                     Vector4 color = new Vector4(1,1,1,1);
                     Font _fTitle = fSubtitle;
 
-                    if(i != skillPage) {
+                    if(i != _skillPage) {
                         if (mouseHover(skx, sky, skx + skw, sky + skh)) {
-                            _hoveringID = skillName;
+                            __hoveringID = skillName;
                             drawImage(Sprite("elements", "tab_sep_hover"), skxc - skww, sky + skh - 4, skww * 2, 4);
                             if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
                                 setSkillPage(i);
-                                api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/pagesub.ogg"), false, .3f);
+                                _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/pagesub.ogg"), false, .3f);
                             }
 
                         } else {
@@ -624,8 +624,8 @@ namespace xSkillGilded {
             float aby = sky + skh + _ui(8);
             float abw = contentWidth - abx - _ui(8);
             float abh = windowHeight - aby - _ui(8);
-            float bw  = _ui(buttonWidth);
-            float bh  = _ui(buttonHeight);
+            float bw  = _ui(_buttonWidth);
+            float bh  = _ui(_buttonHeight);
 
             float padX = Math.Max(0, _ui(_abilityPageWidth) - abw  + _ui(128));
             float padY = Math.Max(0, _ui(_abilityPageHeight) - abh + _ui(128));
@@ -639,21 +639,21 @@ namespace xSkillGilded {
             float ofmx = (float)Math.Round(-padX * mrx);
             float ofmy = (float)Math.Round(-padY * mry);
 
-            windowPosX = windowX + abx;
-            windowPosY = windowY + aby;
+            windowPosX = _windowX + abx;
+            windowPosY = _windowY + aby;
             ImGui.SetCursorPos(new(abx, aby));
             ImGui.BeginChild("Ability", new(abw, abh), false, flags);
                 float offx = ofmx + abw / 2;
                 float offy = ofmy + abh / 2;
-                AbilityButton _hoveringButton = null;
+                AbilityButton __hoveringButton = null;
 
                 float lvx = _ui(64);
 
-                for(int i = 1; i < levelRequirementBars.Count; i++) {
-                    float lv = levelRequirementBars[i];
-                    float _y = offy + _ui(_abilityPageHeight / 2 - i * (buttonHeight + buttonPad) + buttonPad / 2);
+                for(int i = 1; i < _levelRequirementBars.Count; i++) {
+                    float lv = _levelRequirementBars[i];
+                    float _y = offy + _ui(_abilityPageHeight / 2 - i * (_buttonHeight + _buttonPad) + _buttonPad / 2);
 
-                    if (mouseHover(lvx, _y - buttonHeight - buttonPad, lvx + abw, _y))
+                    if (mouseHover(lvx, _y - _buttonHeight - _buttonPad, lvx + abw, _y))
                         drawSetColor(new(239/255f, 183/255f, 117/255f, 1));
                     else
                         drawSetColor(new(104/255f, 76/255f, 60/255f, 1));
@@ -664,7 +664,7 @@ namespace xSkillGilded {
                 }
                 drawSetColor(c_white);
 
-                foreach (DecorationLine line in decorationLines) {
+                foreach (DecorationLine line in _decorationLines) {
                     drawSetColor(line.color);
 
                     if(line.y0 == line.y1) {
@@ -676,7 +676,7 @@ namespace xSkillGilded {
                 }
                 drawSetColor(c_white);
 
-                foreach (AbilityButton button in abilityButtons.Values) {
+                foreach (AbilityButton button in _abilityButtons.Values) {
                     float bx = _ui(button.x) + offx;
                     float by = _ui(button.y) + offy;
                     string buttonSpr = "abilitybox_frame_inactive";
@@ -702,7 +702,7 @@ namespace xSkillGilded {
                     }
 
                     if (mouseHover(bx, by, bx + bw, by + bh)) {
-                        _hoveringButton = button;
+                        __hoveringButton = button;
 
                         if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
                             ability.SetTier(ability.Tier + 1);
@@ -710,9 +710,9 @@ namespace xSkillGilded {
                                 button.glowAlpha = 1;
 
                                 if(ability.Tier == ability.Ability.MaxTier)
-                                    api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/upgradedmax.ogg"), false, .3f);
+                                    _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/upgradedmax.ogg"), false, .3f);
                                 else
-                                    api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/upgraded.ogg"), false, .3f);
+                                    _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/upgraded.ogg"), false, .3f);
                             }
                         }
 
@@ -720,7 +720,7 @@ namespace xSkillGilded {
                             ability.SetTier(ability.Tier - 1);
 
                             if(ability.Tier < tier)
-                                api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/downgraded.ogg"), false, .3f);
+                                _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/downgraded.ogg"), false, .3f);
                         }
                     }
 
@@ -770,14 +770,14 @@ namespace xSkillGilded {
                     drawImage9patch(Sprite("elements", buttonSpr), bx, by, bw, bh, 15);
                 }
 
-                if(_hoveringButton != null && hoveringButton != _hoveringButton)
-                    api.Gui.PlaySound("tick", false, .5f);
-                hoveringButton = _hoveringButton;
-                if(hoveringButton != null) {
-                    PlayerAbility ability = hoveringButton.Ability;
-                    float bx  = _ui(hoveringButton.x) + offx;
-                    float by  = _ui(hoveringButton.y) + offy;
-                    Vector4 c = hoveringButton.drawColor;
+                if(__hoveringButton != null && _hoveringButton != __hoveringButton)
+                    _api.Gui.PlaySound("tick", false, .5f);
+                _hoveringButton = __hoveringButton;
+                if(_hoveringButton != null) {
+                    PlayerAbility ability = _hoveringButton.Ability;
+                    float bx  = _ui(_hoveringButton.x) + offx;
+                    float by  = _ui(_hoveringButton.y) + offy;
+                    Vector4 c = _hoveringButton.drawColor;
 
                     drawSetColor(new(c.X, c.Y, c.Z, .5f));
                     drawImage9patch(Sprite("elements", "abilitybox_frame_selected"), bx - 16, by - 16, bw + 32, bh + 32, 30);
@@ -785,13 +785,13 @@ namespace xSkillGilded {
 
                     List<Requirement> requirements = ability.Ability.Requirements;
                     foreach (Requirement req in requirements)
-                        drawRequirementHighlight(hoveringButton, req, offx, offy);
+                        drawRequirementHighlight(_hoveringButton, req, offx, offy);
 
                 }
 
             ImGui.EndChild();
-            windowPosX = windowX;
-            windowPosY = windowY;
+            windowPosX = _windowX;
+            windowPosY = _windowY;
         }
 
         private void DrawSkillsDescription(float padd, float sky, float skh) {
@@ -799,23 +799,23 @@ namespace xSkillGilded {
             float sdy = sky + skh + _ui(16);
             float sdw = _ui(200);
 
-            if(page == "_Specialize") {
+            if(_page == "_Specialize") {
                 string skillTitle = Lang.GetUnformatted("xlib:specialisations");
                 Vector2 skillTitle_size = drawTextFont(fTitleGold, skillTitle, sdx, sdy);
                 sdy += fTitleGold.getLineHeight() + _ui(8);
 
-                foreach(PlayerSkill skill in allSkills) {
+                foreach(PlayerSkill skill in _allSkills) {
                     float hh = drawSkillLevelDetail(skill, sdx, sdy, sdw, false);
                     sdy += hh;
                 }
 
 
             } else {
-                float hh = drawSkillLevelDetail(currentPlayerSkill, sdx, sdy, sdw, true);
+                float hh = drawSkillLevelDetail(_currentPlayerSkill, sdx, sdy, sdw, true);
                 sdy += hh;
 
-                float unlearnPoint    = currentPlayerSkill.PlayerSkillSet.UnlearnPoints;
-                float unlearnPointReq = xLevelingClient.GetPointsForUnlearn();
+                float unlearnPoint    = _currentPlayerSkill.PlayerSkillSet.UnlearnPoints;
+                float unlearnPointReq = __xLevelingClient.GetPointsForUnlearn();
                 float unlearnAmount   = (float)Math.Floor(unlearnPoint / unlearnPointReq);
                 float unlearnProgress = unlearnPoint / unlearnPointReq - unlearnAmount;
                 float unx = sdx + sdw - _ui(8);
@@ -836,8 +836,8 @@ namespace xSkillGilded {
                 drawProgressBar(unlearnProgress, sdx, sdy, sdw, _ui(4), c_dkgrey, c_red);
                 sdy += _ui(4);
 
-                float unlearnCooldown    = currentPlayerSkill.PlayerSkillSet.UnlearnCooldown;
-                float unlearnCooldownMax = xLevelingClient.Config.unlearnCooldown;
+                float unlearnCooldown    = _currentPlayerSkill.PlayerSkillSet.UnlearnCooldown;
+                float unlearnCooldownMax = __xLevelingClient.Config.unlearnCooldown;
                 if(unlearnCooldown > 0) {
                     drawSetColor(c_grey);
                     drawTextFont(fSubtitle, "Cooldown", sdx, sdy);
@@ -847,12 +847,12 @@ namespace xSkillGilded {
 
                 if(mouseHover(sdx, uny - 4, sdx + sdw, sdy + 4)) {
                     string desc = string.Format(Lang.GetUnformatted("xskillgilded:unlearnDesc"), FormatTime(unlearnCooldownMax * 60f));
-                    hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:unlearnTitle"), desc);
+                    _hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:unlearnTitle"), desc);
                 }
             }
         }
 
-        private void DrawSkillsActions(float padd, int windowHeight, ref string _hoveringID) {
+        private void DrawSkillsActions(float padd, int windowHeight, ref string __hoveringID) {
             float actx = padd + _ui(8);
             float acty = windowHeight - padd - _ui(8);
 
@@ -861,7 +861,7 @@ namespace xSkillGilded {
             float actbx = actx;
             float actby = acty - actbh;
             float actLh = _ui(24);
-            bool isSparing = xLevelingClient.LocalPlayerSkillSet.Sparring;
+            bool isSparing = __xLevelingClient.LocalPlayerSkillSet.Sparring;
 
             drawSetColor(new Vector4(1,1,1,isSparing? 1 : .5f));
             drawImage(Sprite("elements", isSparing? "sparring_enabled" : "sparring_disabled"), actbx + actbw / 2 - _ui(96) / 2, actby + actbh - _ui(96), _ui(96), _ui(96));
@@ -869,49 +869,49 @@ namespace xSkillGilded {
 
             drawImage9patch(Sprite("elements", "button_idle"), actbx, actby + actbh - actLh, actbw, actLh, 2);
             if (mouseHover(actbx, actby, actbx + actbw, actby + actbh)) {
-                _hoveringID = "Sparring";
+                __hoveringID = "Sparring";
                 drawImage9patch(Sprite("elements", "button_idle_hovering"), actbx-1, actby + actbh - actLh-1, actbw+2, actLh+2, 2);
                 if(ImGui.IsMouseClicked(ImGuiMouseButton.Left)) {
                     OnSparringToggle(!isSparing);
-                    api.Gui.PlaySound(new AssetLocation("xskillgilded", isSparing? "sounds/sparringoff.ogg" : "sounds/sparringon.ogg"), false, .6f);
+                    _api.Gui.PlaySound(new AssetLocation("xskillgilded", isSparing? "sounds/sparringoff.ogg" : "sounds/sparringon.ogg"), false, .6f);
                 }
 
                 if(ImGui.IsMouseDown(ImGuiMouseButton.Left)) {
                     drawImage9patch(Sprite("elements", "button_pressing"), actbx, actby + actbh - actLh, actbw, actLh, 2);
                 }
 
-                hoveringTooltip = new(Lang.GetUnformatted("xlib:sparringmode"), Lang.GetUnformatted("xlib:sparring-desc"));
+                _hoveringTooltip = new(Lang.GetUnformatted("xlib:sparringmode"), Lang.GetUnformatted("xlib:sparring-desc"));
             }
 
             drawTextFont(fSubtitle, "Spar", actbx + actbw / 2, actby + actbh - _ui(4), HALIGN.Center, VALIGN.Bottom);
         }
 
         private void DrawTooltip(float padd, float sky, float skh, int windowWidth, int windowHeight) {
-            float tooltipX = windowWidth - tooltipWidth - padd;
+            float tooltipX = windowWidth - _tooltipWidth - padd;
             float tooltipY = sky + skh + _ui(32);
-            float tooltipW = tooltipWidth - padd;
+            float tooltipW = _tooltipWidth - padd;
             float tooltipH = windowHeight - tooltipY - padd;
 
             drawImage(Sprite("elements", "tooltip_sep_v"), tooltipX - _ui(16), tooltipY, 2, tooltipH);
 
-            if(hoveringTooltip != null) {
+            if(_hoveringTooltip != null) {
                 tooltipY += fTitleGold.getLineHeight();
-                drawTextFont(fTitleGold, hoveringTooltip.Title, tooltipX + _ui(8), tooltipY, HALIGN.Left, VALIGN.Bottom);
+                drawTextFont(fTitleGold, _hoveringTooltip.Title, tooltipX + _ui(8), tooltipY, HALIGN.Left, VALIGN.Bottom);
 
                 tooltipY += _ui(2);
                 drawProgressBar(0, tooltipX, tooltipY, tooltipW, _ui(4), c_dkgrey, c_lime);
                 tooltipY += _ui(12);
 
-                // float h = drawTextWrap(hoveringTooltip.Description, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
-                if(currentTooltip != hoveringTooltip.Description) {
-                    tooltipVTML = VTML.parseVTML(hoveringTooltip.Description);
-                    currentTooltip = hoveringTooltip.Description;
+                // float h = drawTextWrap(_hoveringTooltip.Description, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
+                if(_currentTooltip != _hoveringTooltip.Description) {
+                    _tooltipVTML = VTML.parseVTML(_hoveringTooltip.Description);
+                    _currentTooltip = _hoveringTooltip.Description;
                 }
 
-                float h = drawTextVTML(tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
+                float h = drawTextVTML(_tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
 
-            } else if(hoveringButton != null) {
-                PlayerAbility ability = hoveringButton.Ability;
+            } else if(_hoveringButton != null) {
+                PlayerAbility ability = _hoveringButton.Ability;
 
                 string name      = ability.Ability.DisplayName;
                 string skillName = ability.Ability.Skill.DisplayName;
@@ -929,12 +929,12 @@ namespace xSkillGilded {
 
                 string descCurrTier = formatAbilityDescription(ability.Ability, tier);
                 // float h = drawTextWrap(descCurrTier, tooltipX + 8, tooltipY, HALIGN.Left, VALIGN.Top, tooltipW - 16);
-                if(currentTooltip != descCurrTier) {
-                    tooltipVTML = VTML.parseVTML(descCurrTier);
-                    currentTooltip = descCurrTier;
+                if(_currentTooltip != descCurrTier) {
+                    _tooltipVTML = VTML.parseVTML(descCurrTier);
+                    _currentTooltip = descCurrTier;
                 }
 
-                float h = drawTextVTML(tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
+                float h = drawTextVTML(_tooltipVTML, tooltipX + _ui(8), tooltipY, tooltipW - _ui(16));
                 tooltipY += Math.Max(h + _ui(16), _ui(160));
 
                 drawSetColor(new(104/255f, 76/255f, 60/255f, 1));
@@ -946,7 +946,7 @@ namespace xSkillGilded {
                     int requiredLevel = ability.Ability.RequiredLevel(tier + 1);
                     string reqText    = string.Format(Lang.GetUnformatted("xskillgilded:abilityLevelRequired"), skillName, requiredLevel);
 
-                    drawSetColor(currentPlayerSkill.Level >= requiredLevel? c_lime : c_red);
+                    drawSetColor(_currentPlayerSkill.Level >= requiredLevel? c_lime : c_red);
                     drawTextFont(fSubtitle, reqText, tooltipX + _ui(8), tooltipY);
                     drawSetColor(c_white);
                     tooltipY += fSubtitle.getLineHeight() + _ui(4);
@@ -992,7 +992,7 @@ namespace xSkillGilded {
                 drawSetColor(c_white);
             }
 
-            hoveringTooltip = null;
+            _hoveringTooltip = null;
         }
 
         private string formatAbilityDescription(Ability ability, int currTier) {
@@ -1074,8 +1074,8 @@ namespace xSkillGilded {
                 int abilityPoint = skill.AbilityPoints;
                 string skillPointTitle = abilityPoint.ToString();
 
-                float unlearnPoint    = currentPlayerSkill.PlayerSkillSet.UnlearnPoints;
-                float unlearnPointReq = xLevelingClient.GetPointsForUnlearn();
+                float unlearnPoint    = _currentPlayerSkill.PlayerSkillSet.UnlearnPoints;
+                float unlearnPointReq = __xLevelingClient.GetPointsForUnlearn();
                 float unlearnAmount   = (float)Math.Floor(unlearnPoint / unlearnPointReq);
                 string unlearnPointTitle = unlearnAmount.ToString();
 
@@ -1123,7 +1123,7 @@ namespace xSkillGilded {
 
                     desc = string.Format(desc, VTML.WrapFont(_bonusText, expBonus > 0? "#7ac62f" : "#bf663f"), VTML.WrapFont(totalBonusText, totalBonus > 0? "#7ac62f" : "#bf663f"));
                         
-                    hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:expBonusTitle"), desc);
+                    _hoveringTooltip = new(Lang.GetUnformatted("xskillgilded:expBonusTitle"), desc);
                 }
             }
             
@@ -1154,14 +1154,14 @@ namespace xSkillGilded {
             
             float bx  = _ui(button.x) + offx;
             float by  = _ui(button.y) + offy;
-            float bw  = _ui(buttonWidth);
-            float bh  = _ui(buttonHeight);
+            float bw  = _ui(_buttonWidth);
+            float bh  = _ui(_buttonHeight);
                         
             AbilityRequirement abilityRequirement = requirement as AbilityRequirement;
             if(abilityRequirement != null) {
                 string name = abilityRequirement.Ability.Name;
-                if(abilityButtons.ContainsKey(name)) {
-                    AbilityButton _button = abilityButtons[name];
+                if(_abilityButtons.ContainsKey(name)) {
+                    AbilityButton _button = _abilityButtons[name];
 
                     float _bx  = _ui(_button.x) + offx;
                     float _by  = _ui(_button.y) + offy;
@@ -1188,8 +1188,8 @@ namespace xSkillGilded {
             ExclusiveAbilityRequirement exclusiveAbilityRequirement = requirement as ExclusiveAbilityRequirement;
             if(exclusiveAbilityRequirement != null) {
                 string name = exclusiveAbilityRequirement.Ability.Name;
-                if(abilityButtons.ContainsKey(name)) {
-                    AbilityButton _button = abilityButtons[name];
+                if(_abilityButtons.ContainsKey(name)) {
+                    AbilityButton _button = _abilityButtons[name];
 
                     float _bx  = _ui(_button.x) + offx;
                     float _by  = _ui(_button.y) + offy;
@@ -1224,28 +1224,28 @@ namespace xSkillGilded {
         }
 
         private void OnSparringToggle(bool toggle) {
-            xLevelingClient.LocalPlayerSkillSet.Sparring = toggle;
+            __xLevelingClient.LocalPlayerSkillSet.Sparring = toggle;
             CommandPackage package = new CommandPackage(EnumXLevelingCommand.SparringMode, toggle ? 1 : 0);
-            xLevelingClient.SendPackage(package);
+            __xLevelingClient.SendPackage(package);
         }
 
         private void Open() {
             if(isOpen) return;
 
-            if(!isReady) {
+            if(!_isReady) {
                 onCheckAPI(0);
-                if(!isReady) return;
+                if(!_isReady) return;
             }
 
             isOpen = true;
-            imguiModSystem.Show();
-            api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/open.ogg"), false, .3f);
+            _imguiModSystem.Show();
+            _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/open.ogg"), false, .3f);
         }
 
         private void Close() { 
             if(!isOpen) return;
             isOpen = false;
-            api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/close.ogg"), false, .3f);
+            _api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/close.ogg"), false, .3f);
         }
 
         private bool Toggle(KeyCombination _) {
@@ -1257,9 +1257,9 @@ namespace xSkillGilded {
         public override void Dispose() {
             base.Dispose();
 
-            api.Event.UnregisterGameTickListener(checkLevelID);
-            // imguiModSystem.Draw   -= Draw;
-            // imguiModSystem.Closed -= Close;
+            _api.Event.UnregisterGameTickListener(_checkLevelID);
+            // _imguiModSystem.Draw   -= Draw;
+            // _imguiModSystem.Closed -= Close;
         }
     }
 
