@@ -113,6 +113,26 @@ internal class SkillPageManager
         SetPageContent();
     }
 
+    public bool NavigateToSkill(PlayerSkill skill)
+    {
+        if (skill == null) return false;
+
+        // Find the group this skill belongs to
+        var groupName = skill.Skill.Group;
+        if (!SkillGroups.ContainsKey(groupName)) return false;
+
+        // Find the index of the skill within its group
+        var skillList = SkillGroups[groupName];
+        var skillIndex = skillList.IndexOf(skill);
+        if (skillIndex < 0) return false;
+
+        // Navigate to the skill's page
+        SetPage(groupName);
+        SetSkillPage(skillIndex);
+
+        return true;
+    }
+
     private void SetPageContent()
     {
         AbilityButtons = new Dictionary<string, AbilityButton>();
