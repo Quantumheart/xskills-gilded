@@ -14,7 +14,6 @@ internal static class AbilityRenderer
     public static AbilityButton Draw(
         SkillPageManager pageManager,
         ICoreClientAPI api,
-        ImGuiViewportPtr viewPort,
         float padd,
         float sky,
         float skh,
