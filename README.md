@@ -12,15 +12,7 @@ This project is based on the original work by Ttanasart-pt. All rights and credi
 
 Here are some screenshots of the user interface:
 
-![UI Screenshot 1](resources/2025-07-24%2019-12-58.png)
-
-![UI Screenshot 2](resources/2025-07-25%2011-24-09.png)
-
-![UI Screenshot 3](resources/2025-07-25%2012-42-15.png)
-
-![UI Screenshot 4](resources/2025-07-25%2016-34-26.png)
-
-![UI Screenshot 5](resources/2025-07-26%2015-52-10.png)
+![00-main.png](resources/modpage/00-main.png)
 
 More screenshots can be found in the `resources/` directory.
 
@@ -29,6 +21,7 @@ More screenshots can be found in the `resources/` directory.
 ### Mod Dependencies
 - **Vintage Story**: 1.20.4 or higher
 - **xlib**: 0.8.16 or higher
+- **xSkills**: 0.8.16 or higher
 
 ### Development Dependencies
 The mod is built using .NET 8.0 and requires the following Vintage Story references:
