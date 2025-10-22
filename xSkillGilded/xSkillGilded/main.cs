@@ -36,6 +36,7 @@ public class xSkillGraphicalUI : ModSystem
     private SkillPageManager pageManager;
     private SkillUIRenderer uiRenderer;
     private Stopwatch stopwatch;
+    private PlayerSkill lastLeveledUpSkill;
 
     private readonly int windowBaseHeight = 1060;
     private readonly int windowBaseWidth = 1800;
@@ -130,6 +131,9 @@ public class xSkillGraphicalUI : ModSystem
                 LevelPopup levelPopup = new(api, skill);
                 api.Gui.PlaySound(new AssetLocation("xskillgilded", "sounds/levelup.ogg"), false, .3f);
                 api.Logger.Debug($"{skill.Skill.Name}, {skill.Skill.Id} Level up");
+
+                // Store the last leveled up skill for navigation
+                lastLeveledUpSkill = skill;
             }
 
             pageManager.PreviousLevels[skill] = currentLevel;
@@ -212,6 +216,13 @@ public class xSkillGraphicalUI : ModSystem
         {
             OnCheckAPI(0);
             if (!isReady) return;
+        }
+
+        // Navigate to the last leveled up skill if available
+        if (lastLeveledUpSkill != null)
+        {
+            pageManager.NavigateToSkill(lastLeveledUpSkill);
+            lastLeveledUpSkill = null; // Clear after navigation
         }
 
         isOpen = true;
