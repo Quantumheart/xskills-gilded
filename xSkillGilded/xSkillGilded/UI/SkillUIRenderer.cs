@@ -14,7 +14,6 @@ internal class SkillUIRenderer
 {
     private readonly ICoreClientAPI api;
     private readonly SkillPageManager pageManager;
-    private readonly ImGuiViewportPtr viewPort;
     private readonly float tooltipWidth = 400;
 
     private AbilityButton hoveringButton;
@@ -27,7 +26,6 @@ internal class SkillUIRenderer
     {
         this.api = api;
         this.pageManager = pageManager;
-        this.viewPort = viewPort;
         tooltipVTML = new List<VTMLblock>();
     }
 
@@ -47,7 +45,6 @@ internal class SkillUIRenderer
         var newHoveringButton = AbilityRenderer.Draw(
             pageManager,
             api,
-            viewPort,
             padd,
             sky,
             skh,
