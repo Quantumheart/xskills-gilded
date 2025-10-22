@@ -5,6 +5,7 @@ using Vintagestory.API.Client;
 using XLib.XLeveling;
 using xSkillGilded.Models;
 using xSkillGilded.Utilities;
+using AbilityButton = xSkillGilded.Models.AbilityButton;
 
 namespace xSkillGilded.Managers;
 

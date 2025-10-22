@@ -6,6 +6,7 @@ using xSkillGilded.Managers;
 using xSkillGilded.Models;
 using xSkillGilded.Utilities;
 using static xSkillGilded.ImGuiUtil;
+using AbilityButton = xSkillGilded.Models.AbilityButton;
 
 namespace xSkillGilded.UI.Renderers;
 
