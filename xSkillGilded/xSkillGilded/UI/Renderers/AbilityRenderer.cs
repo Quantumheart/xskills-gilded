@@ -37,14 +37,17 @@ internal static class AbilityRenderer
         var mx = ImGui.GetMousePos().X;
         var my = ImGui.GetMousePos().Y;
 
-        var mrx = (mx - (viewPort.Pos.X + abx)) / abw - .5f;
-        var mry = (my - (viewPort.Pos.Y + aby)) / abh - .5f;
+        float savedWindowPosX = windowPosX;
+        float savedWindowPosY = windowPosY;
+        
+        var mrx = (mx - (savedWindowPosX + abx)) / abw - .5f;
+        var mry = (my - (savedWindowPosY + aby)) / abh - .5f;
 
         var ofmx = (float)Math.Round(-padX * mrx);
         var ofmy = (float)Math.Round(-padY * mry);
 
-        windowPosX = 0 + abx; // windowX
-        windowPosY = 0 + aby; // windowY
+        windowPosX = savedWindowPosX + abx; // windowX
+        windowPosY = savedWindowPosY + aby; // windowY
         ImGui.SetCursorPos(new Vector2(abx, aby));
         ImGui.BeginChild("Ability", new Vector2(abw, abh), false, flags);
         var offx = ofmx + abw / 2;
@@ -210,8 +213,8 @@ internal static class AbilityRenderer
         }
 
         ImGui.EndChild();
-        windowPosX = 0; // windowX
-        windowPosY = 0; // windowY
+        windowPosX = savedWindowPosX; // windowX
+        windowPosY = savedWindowPosY; // windowY
 
         return _hoveringButton;
     }
