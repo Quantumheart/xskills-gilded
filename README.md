@@ -2,6 +2,12 @@
 
 Fancy GUI for xSkills mod.
 
+## Additional Features
+
+- Multi monitor support
+- Close skills menu on esc
+- Navigate to last leveled up skill
+
 ## Credits
 
 Original Author: **[Ttanasart-pt](https://github.com/Ttanasart-pt)**
